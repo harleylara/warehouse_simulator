@@ -1,0 +1,598 @@
+<?xml version='1.0' encoding='ASCII'?>
+<sdf version='1.7'>
+  <world name='world_demo'>
+    <gravity>0 0 -9.8</gravity>
+    <physics type='ode'>
+      <max_step_size>0.01</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <max_contacts>10</max_contacts>
+    </physics>
+    <plugin name='ignition::gazebo::systems::Physics' filename='libignition-gazebo-physics-system.so'/>
+    <plugin name='ignition::gazebo::systems::UserCommands' filename='libignition-gazebo-user-commands-system.so'/>
+    <plugin name='ignition::gazebo::systems::SceneBroadcaster' filename='libignition-gazebo-scene-broadcaster-system.so'/>
+    <plugin name='ignition::gazebo::systems::Imu' filename='ignition-gazebo-imu-system'/>
+    <plugin name='ignition::gazebo::systems::Sensors' filename='ignition-gazebo-sensors-system'>
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <gui fullscreen="1">
+
+      <!-- 3D scene -->
+      <plugin filename="GzScene3D" name="3D View">
+        <ignition-gui>
+          <title>3D View</title>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="string" key="state">docked</property>
+        </ignition-gui>
+
+        <engine>ogre2</engine>
+        <scene>scene</scene>
+        <ambient_light>0.4 0.4 0.4</ambient_light>
+        <background_color>0.8 0.8 0.8</background_color>
+        <camera_pose>2.0 18.4 9.6  0.0 0.7297 -1.3801</camera_pose>
+      </plugin>
+
+      <!-- World control -->
+      <plugin filename="WorldControl" name="World control">
+        <ignition-gui>
+          <title>World control</title>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="bool" key="resizable">false</property>
+          <property type="double" key="height">72</property>
+          <property type="double" key="width">121</property>
+          <property type="double" key="z">1</property>
+
+          <property type="string" key="state">floating</property>
+          <anchors target="3D View">
+            <line own="left" target="left"/>
+            <line own="bottom" target="bottom"/>
+          </anchors>
+        </ignition-gui>
+
+        <play_pause>true</play_pause>
+        <step>true</step>
+        <start_paused>true</start_paused>
+
+      </plugin>
+
+      <!-- World statistics -->
+      <plugin filename="WorldStats" name="World stats">
+        <ignition-gui>
+          <title>World stats</title>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="bool" key="resizable">false</property>
+          <property type="double" key="height">110</property>
+          <property type="double" key="width">290</property>
+          <property type="double" key="z">1</property>
+
+          <property type="string" key="state">floating</property>
+          <anchors target="3D View">
+            <line own="right" target="right"/>
+            <line own="bottom" target="bottom"/>
+          </anchors>
+        </ignition-gui>
+
+        <sim_time>true</sim_time>
+        <real_time>true</real_time>
+        <real_time_factor>true</real_time_factor>
+        <iterations>true</iterations>
+      </plugin>
+
+      <plugin filename="TransformControl" name="Transform control">
+          <ignition-gui>
+              <property type="bool" key="showTitleBar">false</property>
+              <property key="x" type="double">0</property>
+              <property key="y" type="double">0</property>
+              <property key="width" type="double">250</property>
+              <property key="height" type="double">50</property>
+              <property key="state" type="string">floating</property>
+              <property key="cardBackground" type="string">#666666</property>
+          </ignition-gui>
+      </plugin>
+      <plugin filename="Shapes" name="Shapes">
+          <ignition-gui>
+              <property type="bool" key="showTitleBar">false</property>
+              <property key="x" type="double">250</property>
+              <property key="y" type="double">0</property>
+              <property key="width" type="double">150</property>
+              <property key="height" type="double">50</property>
+              <property key="state" type="string">floating</property>
+              <property key="cardBackground" type="string">#666666</property>
+          </ignition-gui>
+      </plugin>
+      <plugin filename="Screenshot" name="Screenshot">
+          <ignition-gui>
+              <property type="bool" key="showTitleBar">false</property>
+              <property key="x" type="double">400</property>
+              <property key="y" type="double">0</property>
+              <property key="width" type="double">50</property>
+              <property key="height" type="double">50</property>
+              <property key="state" type="string">floating</property>
+              <property key="cardBackground" type="string">#666666</property>
+          </ignition-gui>
+      </plugin>
+      <plugin filename="ComponentInspector" name="Component inspector">
+          <ignition-gui>
+              <property key="x" type="double">0</property>
+              <property key="y" type="double">0</property>
+              <property key="width" type="double">400</property>
+              <property key="height" type="double">375</property>
+              <property key="state" type="string">docked_collapsed</property>
+          </ignition-gui>
+      </plugin>
+      <plugin filename="EntityTree" name="Entity tree">
+          <ignition-gui>
+              <property key="x" type="double">0</property>
+              <property key="y" type="double">0</property>
+              <property key="width" type="double">400</property>
+              <property key="height" type="double">375</property>
+              <property key="state" type="string">docked_collapsed</property>
+          </ignition-gui>
+      </plugin>
+      <plugin filename="Teleop" name="Teleop">
+          <ignition-gui>
+              <property key="x" type="double">0</property>
+              <property key="y" type="double">0</property>
+              <property key="width" type="double">400</property>
+              <property key="height" type="double">900</property>
+              <property key="state" type="string">docked</property>
+          </ignition-gui>
+          <topic>/model/tugbot/cmd_vel</topic>
+      </plugin>
+    </gui>
+
+    <scene>
+      <ambient>1 1 1 1</ambient>
+      <background>0.3 0.7 0.9 1</background>
+      <shadows>0</shadows>
+      <grid>false</grid>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>0</cast_shadows>
+      <pose>-5 -3 10 0 0 0</pose>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>1 1 1 1</specular>
+      <direction>0 0 -1</direction>
+    </light>
+
+    <model name='ground_plane'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <plane>
+              <normal>0.0 0.0 1</normal>
+              <size>1 1</size>
+            </plane>
+          </geometry>
+        </collision>
+      </link>
+      <pose>0 0 0 0 0 0</pose>
+    </model>
+
+    <!-- Base -->
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Warehouse
+      </uri>
+      <name>warehouse</name>
+      <pose>0 0 -0.09 0 0 0</pose>
+    </include>
+
+    <!-- Tugbot -->
+
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/Tugbot-charging-station
+      </uri>
+      <name>charging_station</name>
+      <pose>14.7 -10.6 -0.04 0 0 0</pose>
+    </include>
+
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/Tugbot
+      </uri>
+      <name>tugbot</name>
+      <pose>13.9 -10.6 0.1 0 0 0</pose>
+    </include>
+
+    <!-- Carts -->
+
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/cart_model_2
+      </uri>
+      <name>cart1</name>
+      <pose>-5.73 15 0.25 0 -0 0</pose>
+    </include>
+
+    <!-- Objects -->
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf_big
+      </uri>
+      <name>shelf_big_0</name>
+      <pose>-9.34177 -13.5598 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf
+      </uri>
+      <name>shelf</name>
+      <pose>-4.41528 -0.690987 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf
+      </uri>
+      <name>shelf_0</name>
+      <pose>-4.41528 2.30697 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf
+      </uri>
+      <name>shelf_1</name>
+      <pose>-4.41528 5.30708 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf
+      </uri>
+      <name>shelf_2</name>
+      <pose>-4.41528 8.34352 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf
+      </uri>
+      <name>shelf_3</name>
+      <pose>5.60144 8.34352 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf
+      </uri>
+      <name>shelf_4</name>
+      <pose>5.60144 5.30708 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf
+      </uri>
+      <name>shelf_5</name>
+      <pose>5.60144 -0.690987 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf
+      </uri>
+      <name>shelf_6</name>
+      <pose>5.60144 2.30697 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/pallet_box_mobile
+      </uri>
+      <name>pallet_box_mobile</name>
+      <pose>4.4161 14.6952 0.01 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/pallet_box_mobile
+      </uri>
+      <name>pallet_box_mobile_0</name>
+      <pose>4.45415 13.6212 0.01 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/pallet_box_mobile
+      </uri>
+      <name>pallet_box_mobile_1</name>
+      <pose>4.4468 12.229 0.01 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/pallet_box_mobile
+      </uri>
+      <name>pallet_box</name>
+      <pose>-6.11913 13.7079 0.01 0 -0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf_big
+      </uri>
+      <name>shelf_big_1</name>
+      <pose>13.9821 15.319 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf_big
+      </uri>
+      <name>shelf_big_2</name>
+      <pose>6.19777 -12.9647 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf_big
+      </uri>
+      <name>shelf_big_3</name>
+      <pose>0.594376 -12.9647 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf_big
+      </uri>
+      <name>shelf_big_4</name>
+      <pose>-5.36284 -12.9647 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf
+      </uri>
+      <name>shelf_7</name>
+      <pose>13.3818 -21.2416 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf
+      </uri>
+      <name>shelf_8</name>
+      <pose>13.3818 -19.0028 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf
+      </uri>
+      <name>shelf_9</name>
+      <pose>13.3818 -16.4478 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/shelf
+      </uri>
+      <name>shelf_10</name>
+      <pose>13.3818 -14.1028 0 0 -0 0</pose>
+    </include>
+    <include>
+      <uri>
+        https://fuel.ignitionrobotics.org/1.0/MovAi/models/pallet_box_mobile
+      </uri>
+      <name>pallet_box_0</name>
+      <pose>14.0222 -24.335 0.01 0 -0 0</pose>
+      <static>true</static>
+    </include>
+
+    <!-- Actors -->
+    <actor name="actor_walking_00">
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0.000000</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id="0" type="walk">
+          <waypoint>
+            <time>0</time>
+            <pose>-6.3 -2.1 1.0 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>6</time>
+            <pose>0.0 -2.1 1.0 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>12</time>
+            <pose>6.5 -2.1 1.0 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>18</time>
+            <pose>12.8 -2.1 1.0 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>24</time>
+            <pose>12.8 -2.1 1.0 0 0 3.142</pose>
+          </waypoint>
+          <waypoint>
+            <time>30</time>
+            <pose>6.5 -2.1 1.0 0 0 3.142</pose>
+          </waypoint>
+          <waypoint>
+            <time>36</time>
+            <pose>0.0 -2.1 1.0 0 0 3.142</pose>
+          </waypoint>
+          <waypoint>
+            <time>42</time>
+            <pose>-6.3 -2.1 1.0 0 0 3.142</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+    <actor name="actor_walking_01">
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0.000000</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id="0" type="walk">
+          <waypoint>
+            <time>0</time>
+            <pose>12.8 5.1 1.0 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>6</time>
+            <pose>12.8 1.3 1.0 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>9</time>
+            <pose>12.8 1.3 1.0 0 0 3.142</pose>
+          </waypoint>
+          <waypoint>
+            <time>15</time>
+            <pose>6.5 1.3 1.0 0 0 3.142</pose>
+          </waypoint>
+          <waypoint>
+            <time>21</time>
+            <pose>0.0 1.3 1.0 0 0 3.142</pose>
+          </waypoint>
+          <waypoint>
+            <time>27</time>
+            <pose>-6.3 1.3 1.0 0 0 3.142</pose>
+          </waypoint>
+          <waypoint>
+            <time>30</time>
+            <pose>-6.3 1.3 1.0 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>36</time>
+            <pose>0.0 1.3 1.0 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>42</time>
+            <pose>6.5 1.3 1.0 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>48</time>
+            <pose>12.8 1.3 1.0 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>51</time>
+            <pose>12.8 1.3 1.0 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>57</time>
+            <pose>12.8 5.1 1.0 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>60</time>
+            <pose>12.8 5.1 1.0 0 0 -1.57</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+    <actor name="actor_walking_02">
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0.000000</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id="0" type="walk">
+          <waypoint>
+            <time>0</time>
+            <pose>0 0 1.0 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2</time>
+            <pose>2.0 0 1.0 0 0 0</pose>
+          </waypoint>
+          <waypoint>
+            <time>2.5</time>
+            <pose>2 0 1.0 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4</time>
+            <pose>2 2 1.0 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4.5</time>
+            <pose>2 2 1.0 0 0 3.142</pose>
+          </waypoint>
+          <waypoint>
+            <time>6</time>
+            <pose>0 2 1 0 0 3.142</pose>
+          </waypoint>
+          <waypoint>
+            <time>6.5</time>
+            <pose>0 2 1 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8</time>
+            <pose>0 0 1.0 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8.5</time>
+            <pose>0 0 1.0 0 0 0</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+    <actor name="actor_walking_03">
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <auto_start>true</auto_start>
+      </script>
+    </actor>
+    <actor name="actor_walking_04">
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <auto_start>true</auto_start>
+      </script>
+    </actor>
+    <actor name="actor_walking_05">
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name='walk'>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <auto_start>true</auto_start>
+      </script>
+    </actor>
+    <!-- Plugin de trayectoria aleatoria -->
+    <plugin filename="libRandomActorWalkingPlugin.so" name="gz::sim::systems::RandomActorWalkingPlugin">
+      <actor_name>actor_walking_03</actor_name>
+      <start_x>0.0</start_x>
+      <start_y>2.5</start_y>
+      <start_yaw>1.57</start_yaw>   <!-- rad -->
+      <ws_min_x>-2</ws_min_x><ws_max_x>2</ws_max_x>
+      <ws_min_y>2</ws_min_y><ws_max_y>6</ws_max_y>
+      <speed>1.0</speed>
+      <z_height>0.0</z_height>
+      <turn_rate>1.5</turn_rate>
+      <seed>42</seed>
+    </plugin>
+
+    <plugin filename="libActorWaypointFollowerPlugin.so" name="ignition::gazebo::systems::ActorWaypointFollowerPlugin">
+      <yaml_file>${WAREHOUSE_SIMULATOR_YAML}</yaml_file>
+      <default_speed>1.0</default_speed>
+      <default_tolerance>0.30</default_tolerance>
+      <!-- <z_override>1.0</z_override>  Opcional -->
+    </plugin>
+  </world>
+</sdf>

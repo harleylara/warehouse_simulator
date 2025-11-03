@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>warehouse_simulator</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="simon.martinez.rzs@gmail.com">simon-msi</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>yaml-cpp</depend>
+
+  <depend>gz-sim6</depend>
+  <depend>ignition-gazebo6</depend>
+  <depend>gz-math7</depend>
+  <depend>ignition-math6</depend>
+  <depend>ignition-plugin1</depend> <!-- Included for Actor Pluging -->
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <exec_depend>ros_gz_sim</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+        <!-- Permite que Gazebo encuentre mundos/modelos en la carpeta share del paquete -->
+    <gazebo_ros gazebo_resource_path="${prefix}/share"/>
+  </export>
+</package>
