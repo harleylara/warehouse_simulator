@@ -127,7 +127,7 @@ colcon build
 cd ~/warehouse_ws/src
 ```
 ```
-git clone https://github.com/roboticsuantof/warehouse-simulation.git
+git clone https://github.com/roboticsuantof/warehouse_simulator.git
 ```
 ```
 cd ~/warehouse_ws/
@@ -136,18 +136,10 @@ cd ~/warehouse_ws/
 colcon build
 ```
 
-### Step 3: Navigate to the workspace directory
-
-Make sure your terminal is located in the main project folder.
-
-```
-cd ~/warehouse_ws/src/warehouse-simulation
-```
-
-### Step 4: Launch the simulation
+### Step 3: Launch the simulation
 
 This is the final command. It starts Gazebo, loads the warehouse world, spawns the RB_Theron robot, and activates the control system.
 
 ```
-ros2 launch rb_theron_description_fortress spawn_robot.launch.py
+ros2 launch warehouse_simulator warehouse_simulation.launch.py
 ```
