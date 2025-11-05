@@ -556,10 +556,10 @@
       <animation name='walk'>
         <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
       </animation>
-      <script>
+      <!-- <script>
         <loop>true</loop>
         <auto_start>true</auto_start>
-      </script>
+      </script> -->
     </actor>
     <actor name="actor_walking_05">
       <skin>
@@ -569,10 +569,10 @@
       <animation name='walk'>
         <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
       </animation>
-      <script>
+      <!-- <script>
         <loop>true</loop>
         <auto_start>true</auto_start>
-      </script>
+      </script> -->
     </actor>
     <!-- Plugin de trayectoria aleatoria -->
     <plugin filename="libRandomActorWalkingPlugin.so" name="gz::sim::systems::RandomActorWalkingPlugin">

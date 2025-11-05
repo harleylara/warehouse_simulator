@@ -180,8 +180,8 @@ public:
         {
           tr.entity = *ents.begin();
           tr.resolved = true;
-          if (!_ecm.Component<gzsim::components::WorldPoseCmd>(tr.entity))
-            _ecm.CreateComponent(tr.entity, gzsim::components::WorldPoseCmd(ig::math::Pose3d()));
+          // if (!_ecm.Component<gzsim::components::WorldPoseCmd>(tr.entity))
+          //   _ecm.CreateComponent(tr.entity, gzsim::components::WorldPoseCmd(ig::math::Pose3d()));
         }
       }
     }
@@ -202,6 +202,17 @@ public:
       ig::math::Vector2d to2D(to.X(), to.Y());
       const double dist2D = to2D.Length();
 
+      static double acc = 0.0;
+      acc += dt;
+      if (acc >= 0.2) {
+      std::cout << "[AWF] " << tr.name
+          << " -> target idx " << tr.idx
+          << " pos=(" << pose.Pos().X() << "," << pose.Pos().Y() << ")"
+          << " tgt=(" << tgt.X() << "," << tgt.Y() << ")"
+          << " dist=" << dist2D
+          << std::endl;
+          acc = 0.0; }
+
       // ¿Llegó?
       if (dist2D <= tr.tol)
       {
@@ -213,7 +224,8 @@ public:
           const double yaw = std::atan2(to.Y(), to.X());
           ig::math::Quaterniond q(0, 0, yaw);
           ig::math::Pose3d hold(tgt.X(), tgt.Y(), tgt.Z(), 0, 0, q.Yaw());
-          _ecm.SetComponentData<gzsim::components::WorldPoseCmd>(tr.entity, hold);
+          // _ecm.SetComponentData<gzsim::components::WorldPoseCmd>(tr.entity, hold);
+          _ecm.SetComponentData<gzsim::components::Pose>(tr.entity, hold);
           continue;
         }
       }
@@ -236,7 +248,8 @@ public:
       ig::math::Quaterniond q(0, 0, yaw);
 
       ig::math::Pose3d newPose(newX, newY, newZ, 0, 0, q.Yaw());
-      _ecm.SetComponentData<gzsim::components::WorldPoseCmd>(tr.entity, newPose);
+      // _ecm.SetComponentData<gzsim::components::WorldPoseCmd>(tr.entity, newPose);
+      _ecm.SetComponentData<gzsim::components::Pose>(tr.entity, newPose);
     }
   }
 
