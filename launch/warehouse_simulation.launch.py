@@ -8,6 +8,7 @@ from ament_index_python.packages import get_package_share_directory, get_package
 def generate_launch_description():
     pkg_share_path = get_package_share_directory('warehouse_simulator')
     pkg_install_path = get_package_prefix('warehouse_simulator')
+    models_path = os.path.join(pkg_share_path, 'models')
     lib_path = os.path.join(pkg_install_path, 'lib')
     world_path = os.path.join(pkg_share_path, 'worlds', 'tugbot_warehouse.sdf')
     yaml_path = os.path.join(pkg_share_path, 'config', 'actors_waypoints.yaml')
@@ -30,14 +31,14 @@ def generate_launch_description():
         name='IGN_GAZEBO_RESOURCE_PATH',
         value=os.pathsep.join(filter(None, [
             os.environ.get('IGN_GAZEBO_RESOURCE_PATH', ''),
-            pkg_share_path
+            models_path
         ]))
     )
     set_gz = SetEnvironmentVariable(
         name='GZ_SIM_RESOURCE_PATH',
         value=os.pathsep.join(filter(None, [
             os.environ.get('GZ_SIM_RESOURCE_PATH', ''),
-            pkg_share_path
+            models_path
         ]))
     )
 

@@ -41,7 +41,7 @@ else()
 endif()
 
 # Instalar carpetas de recursos
-foreach(dir launch  worlds config)
+foreach(dir launch worlds config models)
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${dir})
     install(
       DIRECTORY ${dir}/
@@ -63,6 +63,14 @@ add_library(ActorWaypointFollowerPlugin SHARED src/ActorWaypointFollowerPlugin.c
 target_link_libraries(ActorWaypointFollowerPlugin
   PRIVATE ${GZ_SIM_TARGET} ${GZ_PLUGIN_TARGET} ${GZ_MATH_TARGET} yaml-cpp)
 install(TARGETS ActorWaypointFollowerPlugin
+        LIBRARY DESTINATION lib)
+
+add_library(RandomRobotMovementPlugin SHARED src/RandomRobotMovementPlugin.cpp)
+target_link_libraries(RandomRobotMovementPlugin
+  PRIVATE ${GZ_SIM_TARGET}
+          ${GZ_PLUGIN_TARGET}
+          ${GZ_MATH_TARGET})
+install(TARGETS RandomRobotMovementPlugin
         LIBRARY DESTINATION lib)
 
 if(BUILD_TESTING)
