@@ -1,19 +1,22 @@
 actors:
   - name: actor_walking_04
-    speed: 1.2
-    tolerance: 0.35
+    speed: 2.0
+    tolerance: 0.05
     loop: true
     waypoints:
-      - [0.0, 0.0, 1.0]
-      - [2.0, 3.5, 1.0]
-      - [1.0, 6.0, 1.0]
+      - {x: 0.0, y: 0.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 0.0}
+      - {x: 2.0, y: 3.5, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 90.0}
+      - {x: 1.0, y: 6.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 180.0}
+      - {x: 2.0, y: 6.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 180.0}
+      - {x: 6.0, y: 6.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 180.0}
 
-  - name: actor_walking_05
-    speed: 0.9
-    tolerance: 0.30
-    loop: true
-    waypoints:
-      - {x: -2.0, y: 2.0, z: 1.0}
-      - {x:  2.0, y: 2.0, z: 1.0}
-      - {x:  2.0, y: 6.0, z: 1.0}
-      - {x: -2.0, y: 6.0, z: 1.0}
+
+  # - name: actor_walking_05
+  #   speed: 0.9
+  #   tolerance: 0.30
+  #   loop: true
+  #   waypoints:
+  #     - {x: -2.0, y: 2.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 0.0}
+  #     - {x:  2.0, y: 2.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 90.0}
+  #     - {x:  2.0, y: 6.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 180.0}
+  #     - {x: -2.0, y: 6.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 180.0}
