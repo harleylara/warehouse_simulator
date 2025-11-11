@@ -171,6 +171,12 @@
       <pose>0 0 0 0 0 0</pose>
     </model>
 
+    <include>
+      <uri>model://warehouse_robot</uri>
+      <name>warehouse_robot</name>
+      <pose>2 2 0.1 0 0 0</pose>
+    </include>
+
     <!-- Base -->
     <include>
       <uri>
