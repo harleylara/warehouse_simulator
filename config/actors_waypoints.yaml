@@ -1,22 +1,21 @@
 actors:
-  - name: actor_walking_04
-    speed: 2.0
-    tolerance: 0.05
+  - name: actor_walking_05
+    speed: 1.0                # opcional: override de linear_velocity
+    tolerance: 0.15           # o linear_tolerance: 0.15
+    angular_tolerance: 5.0    # grados (opcional)
     loop: true
     waypoints:
-      - {x: 0.0, y: 0.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 0.0}
-      - {x: 2.0, y: 3.5, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 90.0}
-      - {x: 1.0, y: 6.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 180.0}
-      - {x: 2.0, y: 6.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 180.0}
-      - {x: 6.0, y: 6.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 180.0}
+      - {x: -6.3, y: 10.2, z: 0.5, yaw: 0.0}
+      - {x: 0.0,  y: 10.2, z: 0.5, yaw: 0.0}
+      - {x: 6.5,  y: 10.2, z: 0.5, yaw: 0.0}
+      - {x: 11.3, y: 10.2, z: 0.5, yaw: 0.0}
+      - {x: 11.3, y: 10.2, z: 0.5, yaw: 0.0}
+      - {x: 11.3, y: 10.2, z: 0.5, yaw: 90.0}
+      - {x: 11.3, y: 10.2, z: 0.5, yaw: 180.0}
+      - {x: 11.3, y: 10.2, z: 0.5, yaw: 270.0}
+      - {x: 6.5,  y: 10.2, z: 0.5, yaw: 180.0}
+      - {x: 0.0,  y: 10.2, z: 0.5, yaw: 180.0}
+      - {x: -6.3, y: 10.2, z: 0.5, yaw: 180.0}
+      - {x: -6.3, y: 10.2, z: 0.5, yaw: 90.0}
 
 
-  # - name: actor_walking_05
-  #   speed: 0.9
-  #   tolerance: 0.30
-  #   loop: true
-  #   waypoints:
-  #     - {x: -2.0, y: 2.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 0.0}
-  #     - {x:  2.0, y: 2.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 90.0}
-  #     - {x:  2.0, y: 6.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 180.0}
-  #     - {x: -2.0, y: 6.0, z: 1.0, roll: 0.0, pitch: 0.0, yaw: 180.0}

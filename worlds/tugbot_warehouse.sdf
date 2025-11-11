@@ -373,7 +373,7 @@
     </include>
 
     <!-- Actors -->
-    <actor name="actor_walking_00">
+    <actor name="actor_walking_01">
       <skin>
         <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
         <scale>1.0</scale>
@@ -421,7 +421,7 @@
         </trajectory>
       </script>
     </actor>
-    <actor name="actor_walking_01">
+    <actor name="actor_walking_02">
       <skin>
         <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
         <scale>1.0</scale>
@@ -489,7 +489,7 @@
         </trajectory>
       </script>
     </actor>
-    <actor name="actor_walking_02">
+    <actor name="actor_walking_03">
       <skin>
         <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
         <scale>1.0</scale>
@@ -541,7 +541,7 @@
         </trajectory>
       </script>
     </actor>
-    <actor name="actor_walking_03">
+    <actor name="actor_walking_04">
       <skin>
         <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
         <scale>1.0</scale>
@@ -554,7 +554,7 @@
         <auto_start>true</auto_start>
       </script>
     </actor>
-    <actor name="actor_walking_04">
+    <actor name="actor_walking_05">
       <skin>
         <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
         <scale>1.0</scale>
@@ -566,11 +566,22 @@
         <loop>true</loop>
         <auto_start>true</auto_start>
       </script> -->
+        <plugin filename="libActorWaypointFollowerPlugin.so" name="ignition::gazebo::systems::ActorWaypointFollowerPlugin">
+          <yaml_file>${WAREHOUSE_SIMULATOR_YAML}</yaml_file>
+          <actor_name>actor_walking_05</actor_name>   <!-- opcional si el nombre coincide -->
+          <follow_mode>path</follow_mode>
+          <linear_velocity>1.0</linear_velocity>
+          <angular_velocity>0.2</angular_velocity>
+          <linear_tolerance>0.15</linear_tolerance>
+          <angular_tolerance>0.20</angular_tolerance>
+          <animation_factor>4.0</animation_factor>
+          <animation>walk</animation>
+      </plugin>
     </actor>
 
     <!-- Plugin de trayectoria aleatoria -->
     <plugin filename="libRandomActorWalkingPlugin.so" name="gz::sim::systems::RandomActorWalkingPlugin">
-      <actor_name>actor_walking_03</actor_name>
+      <actor_name>actor_walking_04</actor_name>
       <start_x>0.0</start_x>
       <start_y>2.5</start_y>
       <start_yaw>1.57</start_yaw>   <!-- rad -->
@@ -582,11 +593,6 @@
       <seed>42</seed>
     </plugin>
 
-    <plugin filename="libActorWaypointFollowerPlugin.so" name="ignition::gazebo::systems::ActorWaypointFollowerPlugin">
-      <yaml_file>${WAREHOUSE_SIMULATOR_YAML}</yaml_file>
-      <default_speed>1.0</default_speed>
-      <default_tolerance>0.30</default_tolerance>
-      <!-- <z_override>1.0</z_override>  Opcional -->
-    </plugin>
+
   </world>
 </sdf>
