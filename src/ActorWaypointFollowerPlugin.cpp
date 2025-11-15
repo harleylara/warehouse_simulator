@@ -68,387 +68,473 @@ public:
   }
 
   // --- Configure: leer SDF, preparar componentes y cargar YAML ---
-  void Configure(const gz::sim::Entity &_entity, const std::shared_ptr<const sdf::Element> &_sdf,
-               gz::sim::EntityComponentManager &_ecm, gz::sim::EventManager &) override
+void Configure(const gz::sim::Entity &_entity,
+               const std::shared_ptr<const sdf::Element> &_sdf,
+               gz::sim::EntityComponentManager &_ecm,
+               gz::sim::EventManager &) override
+{
+  this->actorEntity_ = _entity;
+
+  // 1) Verificar que la entidad es un Actor
+  auto actorComp = _ecm.Component<gz::sim::components::Actor>(this->actorEntity_);
+  if (!actorComp)
   {
-    this->actorEntity_ = _entity;
+    std::cerr << "[ActorWaypointFollowerPlugin] Entity " << _entity << " is not an actor.\n";
+    return;
+  }
 
-    // Verificar Actor
-    auto actorComp = _ecm.Component<gz::sim::components::Actor>(this->actorEntity_);
-    if (!actorComp)
+  // 2) Leer parámetros SDF
+  if (_sdf->HasElement("follow_mode"))        this->followMode_       = _sdf->Get<std::string>("follow_mode");
+  if (_sdf->HasElement("linear_velocity"))    this->linVelocity_      = _sdf->Get<double>("linear_velocity");
+  if (_sdf->HasElement("angular_velocity"))   this->angVelocity_      = _sdf->Get<double>("angular_velocity");
+  if (_sdf->HasElement("linear_tolerance"))   this->linTolerance_     = _sdf->Get<double>("linear_tolerance");
+  if (_sdf->HasElement("angular_tolerance"))  this->angTolerance_     = _sdf->Get<double>("angular_tolerance"); // aquí asumo rad
+  if (_sdf->HasElement("animation_factor"))   this->animationFactor_  = _sdf->Get<double>("animation_factor");
+  if (_sdf->HasElement("default_rotation"))   this->defaultRotation_  = _sdf->Get<double>("default_rotation");  // rad
+  if (_sdf->HasElement("yaml_file"))          this->yamlFile_         = _sdf->Get<std::string>("yaml_file");
+  if (_sdf->HasElement("actor_name"))         this->actorNameOverride_= _sdf->Get<std::string>("actor_name");
+
+  this->yamlFile_ = ExpandEnv(this->yamlFile_);
+  if (!this->yamlFile_.empty() && !fs::exists(this->yamlFile_))
+    std::cerr << "[ActorWaypointFollowerPlugin] YAML not found at: " << this->yamlFile_ << "\n";
+
+  // 3) Nombre del actor en la escena
+  std::string sceneActorName = "(unknown)";
+  if (auto nameComp = _ecm.Component<gz::sim::components::Name>(this->actorEntity_))
+    sceneActorName = nameComp->Data();
+
+  // 4) Selección de animación: <animation> del SDF o primera anim disponible
+  std::string animationName;
+  if (_sdf->HasElement("animation"))
+  {
+    animationName = _sdf->Get<std::string>("animation");
+  }
+  else
+  {
+    if (actorComp->Data().AnimationCount() < 1)
     {
-      std::cerr << "[ActorWaypointFollowerPlugin] Entity " << _entity << " is not an actor.\n";
+      std::cerr << "[ActorWaypointFollowerPlugin] Actor has no animations.\n";
       return;
     }
+    animationName = actorComp->Data().AnimationByIndex(0)->Name();
+  }
+  if (animationName.empty())
+  {
+    std::cerr << "[ActorWaypointFollowerPlugin] Empty animation name.\n";
+    return;
+  }
 
-    // Leer parámetros SDF
-    if (_sdf->HasElement("follow_mode"))       this->followMode_      = _sdf->Get<std::string>("follow_mode");
-    if (_sdf->HasElement("linear_velocity"))   this->linVelocity_     = _sdf->Get<double>("linear_velocity");
-    if (_sdf->HasElement("angular_velocity"))  this->angVelocity_     = _sdf->Get<double>("angular_velocity");
-    if (_sdf->HasElement("linear_tolerance"))  this->linTolerance_    = _sdf->Get<double>("linear_tolerance");
-    if (_sdf->HasElement("angular_tolerance")) this->angTolerance_    = _sdf->Get<double>("angular_tolerance");
-    if (_sdf->HasElement("animation_factor"))  this->animationFactor_ = _sdf->Get<double>("animation_factor");
-    if (_sdf->HasElement("default_rotation"))  this->defaultRotation_ = _sdf->Get<double>("default_rotation");
-    if (_sdf->HasElement("yaml_file"))         this->yamlFile_        = _sdf->Get<std::string>("yaml_file");
-    if (_sdf->HasElement("actor_name"))        this->actorNameOverride_= _sdf->Get<std::string>("actor_name");
+  if (!_ecm.Component<gz::sim::components::AnimationName>(this->actorEntity_))
+    _ecm.CreateComponent(this->actorEntity_, gz::sim::components::AnimationName(animationName));
+  else
+    *_ecm.Component<gz::sim::components::AnimationName>(this->actorEntity_) = gz::sim::components::AnimationName(animationName);
+  _ecm.SetChanged(this->actorEntity_, gz::sim::components::AnimationName::typeId,
+                  gz::sim::ComponentState::OneTimeChange);
 
-    this->yamlFile_ = ExpandEnv(this->yamlFile_);
-    if (!this->yamlFile_.empty() && !fs::exists(this->yamlFile_))
-      std::cerr << "[ActorWaypointFollowerPlugin] YAML not found at: " << this->yamlFile_ << "\n";
+  if (!_ecm.Component<gz::sim::components::AnimationTime>(this->actorEntity_))
+    _ecm.CreateComponent(this->actorEntity_, gz::sim::components::AnimationTime());
 
-    // Nombre en escena
-    std::string sceneActorName = "(unknown)";
-    if (auto nameComp = _ecm.Component<gz::sim::components::Name>(this->actorEntity_))
-      sceneActorName = nameComp->Data();
+  // 5) Asegurar que existe Pose (aún no la tocaremos hasta conocer el primer waypoint)
+  gz::math::Pose3d initialPose = gz::math::Pose3d::Zero;
+  if (auto poseComp = _ecm.Component<gz::sim::components::Pose>(this->actorEntity_))
+  {
+    initialPose = poseComp->Data();
+  }
+  else
+  {
+    _ecm.CreateComponent(this->actorEntity_, gz::sim::components::Pose(gz::math::Pose3d::Zero));
+  }
 
-    // Animación: usar <animation> si está; si no, la primera
-    std::string animationName;
-    if (_sdf->HasElement("animation")) animationName = _sdf->Get<std::string>("animation");
-    else
+  // 6) Cargar YAML y seleccionar la ruta del actor
+  if (!this->yamlFile_.empty())
+  {
+    try
     {
-      if (actorComp->Data().AnimationCount() < 1)
+      YAML::Node root = YAML::LoadFile(this->yamlFile_);
+      auto actors = root["actors"];
+      if (!actors || !actors.IsSequence())
       {
-        std::cerr << "[ActorWaypointFollowerPlugin] Actor has no animations.\n";
-        return;
+        std::cerr << "[ActorWaypointFollowerPlugin] 'actors' must be a sequence in " << this->yamlFile_ << "\n";
       }
-      animationName = actorComp->Data().AnimationByIndex(0)->Name();
-    }
-    if (animationName.empty())
-    {
-      std::cerr << "[ActorWaypointFollowerPlugin] Empty animation name.\n";
-      return;
-    }
-
-    // Componentes de animación
-    if (!_ecm.Component<gz::sim::components::AnimationName>(this->actorEntity_))
-      _ecm.CreateComponent(this->actorEntity_, gz::sim::components::AnimationName(animationName));
-    else
-      *_ecm.Component<gz::sim::components::AnimationName>(this->actorEntity_) = gz::sim::components::AnimationName(animationName);
-    _ecm.SetChanged(this->actorEntity_, gz::sim::components::AnimationName::typeId, gz::sim::ComponentState::OneTimeChange);
-
-    if (!_ecm.Component<gz::sim::components::AnimationTime>(this->actorEntity_))
-      _ecm.CreateComponent(this->actorEntity_, gz::sim::components::AnimationTime());
-
-    // Pose inicial de referencia
-    gz::math::Pose3d initialPose = gz::math::Pose3d::Zero;
-    if (auto poseComp = _ecm.Component<gz::sim::components::Pose>(this->actorEntity_))
-    {
-      initialPose = poseComp->Data();
-      auto p = initialPose; p.Pos().X(0); p.Pos().Y(0); // convención: X,Y=0 en Pose
-      *poseComp = gz::sim::components::Pose(p);
-    }
-    else
-    {
-      _ecm.CreateComponent(this->actorEntity_, gz::sim::components::Pose(gz::math::Pose3d::Zero));
-    }
-
-    // TrajectoryPose para mover X-Y
-    if (!_ecm.Component<gz::sim::components::TrajectoryPose>(this->actorEntity_))
-    {
-      auto tp = initialPose; tp.Pos().Z(0);
-      _ecm.CreateComponent(this->actorEntity_, gz::sim::components::TrajectoryPose(tp));
-    }
-
-    // --- Cargar YAML y ruta del actor ---
-    if (!this->yamlFile_.empty())
-    {
-      try
+      else
       {
-        YAML::Node root = YAML::LoadFile(this->yamlFile_);
-        auto actors = root["actors"];
-        if (!actors || !actors.IsSequence())
-        {
-          std::cerr << "[ActorWaypointFollowerPlugin] 'actors' must be a sequence in " << this->yamlFile_ << "\n";
-        }
-        else
-        {
-          const std::string targetName = this->actorNameOverride_.empty() ? sceneActorName : this->actorNameOverride_;
-          bool found = false;
+        const std::string targetName = this->actorNameOverride_.empty() ? sceneActorName : this->actorNameOverride_;
+        bool found = false;
 
-          for (const auto &node : actors)
+        for (const auto &node : actors)
+        {
+          if (!node["name"]) continue;
+          const std::string nm = node["name"].as<std::string>();
+          if (nm != targetName) continue;
+
+          found = true;
+
+          if (node["speed"])              this->linVelocity_  = node["speed"].as<double>();
+          if (node["tolerance"])          this->linTolerance_ = node["tolerance"].as<double>();
+          if (node["linear_tolerance"])   this->linTolerance_ = node["linear_tolerance"].as<double>();
+          if (node["angular_tolerance"])  this->angTolerance_ = IGN_DTOR(node["angular_tolerance"].as<double>()); // deg → rad
+          if (node["loop"])               this->loop_         = node["loop"].as<bool>();
+
+          auto wps = node["waypoints"];
+          if (!wps || !wps.IsSequence() || wps.size() == 0)
           {
-            if (!node["name"]) continue;
-            const std::string nm = node["name"].as<std::string>();
-            if (nm != targetName) continue;
+            std::cerr << "[ActorWaypointFollowerPlugin] Actor '" << nm << "' has no valid waypoints.\n";
+            break;
+          }
 
-            found = true;
-            if (node["speed"])             this->linVelocity_  = node["speed"].as<double>();
-            if (node["tolerance"])         this->linTolerance_ = node["tolerance"].as<double>();
-            if (node["linear_tolerance"])  this->linTolerance_ = node["linear_tolerance"].as<double>();
-            if (node["angular_tolerance"]) this->angTolerance_ = IGN_DTOR(node["angular_tolerance"].as<double>());
-            if (node["loop"])              this->loop_         = node["loop"].as<bool>();
+          this->targetPoses_.clear();
+          this->targetPoses_.reserve(wps.size());
 
-            auto wps = node["waypoints"];
-            if (!wps || !wps.IsSequence() || wps.size() == 0)
+          for (const auto &wp : wps)
+          {
+            if (!wp.IsMap()) continue;
+            Waypoint w;
+            w.x = wp["x"].as<double>();
+            w.y = wp["y"].as<double>();
+            w.z = wp["z"] ? wp["z"].as<double>() : initialPose.Pos().Z();
+
+            if (wp["yaw"])
             {
-              std::cerr << "[ActorWaypointFollowerPlugin] Actor '" << nm << "' has no valid waypoints.\n";
-              break;
+              w.yaw = wp["yaw"].as<double>() * M_PI / 180.0; // deg → rad
+              w.hasYaw = true;
             }
+            this->targetPoses_.push_back(w);
+          }
 
-            this->targetPoses_.clear();
-            this->targetPoses_.reserve(wps.size());
-            for (const auto &wp : wps)
-            {
-              if (!wp.IsMap()) continue;
-              Waypoint w;
-              w.x = wp["x"].as<double>();
-              w.y = wp["y"].as<double>();
-              w.z = wp["z"] ? wp["z"].as<double>() : initialPose.Pos().Z();
-              if (wp["yaw"]) { w.yaw = wp["yaw"].as<double>() * M_PI / 180.0; w.hasYaw = true; }
-              this->targetPoses_.push_back(w);
-            }
+          // Debug resumen
+          std::cout << "[AWF] Actor '" << targetName << "' -> " << this->targetPoses_.size()
+                    << " waypoints, lin_vel=" << this->linVelocity_
+                    << ", lin_tol=" << this->linTolerance_
+                    << ", ang_tol=" << this->angTolerance_
+                    << ", loop=" << std::boolalpha << this->loop_ << std::noboolalpha << "\n";
 
-            // Debug resumen
-            std::cout << "[AWF] Actor '" << targetName << "' -> " << this->targetPoses_.size()
-                      << " waypoints, lin_vel=" << this->linVelocity_
-                      << ", lin_tol=" << this->linTolerance_
-                      << ", ang_tol=" << this->angTolerance_
-                      << ", loop=" << std::boolalpha << this->loop_ << std::noboolalpha << "\n";
-            for (size_t i = 0; i < this->targetPoses_.size(); ++i)
-            {
-              const auto &w = this->targetPoses_[i];
+          for (size_t i = 0; i < this->targetPoses_.size(); ++i)
+          {
+            const auto &w = this->targetPoses_[i];
+            if(print_debug){ 
               std::cout << "  [wp " << i << "] x=" << w.x << " y=" << w.y << " z=" << w.z
                         << (w.hasYaw ? (std::string(" yaw_deg=") + std::to_string(w.yaw * 180.0 / M_PI)) : " (sin yaw)") << "\n";
             }
+          }
 
-            // --- Teleport al primer waypoint ---
-            if (!this->targetPoses_.empty())
+          // 7) Teleport inicial:
+          //    - Pose: fija Z y yaw=0 (sin rotación) y X=Y=0 para que TrajectoryPose no se rote
+          //    - TrajectoryPose: pone X,Y,Yaw del primer waypoint (Z=0 por convención de TrajectoryPose)
+          if (!this->targetPoses_.empty())
+          {
+            const auto &w0 = this->targetPoses_.front();
+            const double yaw0 = w0.hasYaw ? w0.yaw : this->defaultRotation_;
+
+            // Pose → sólo Z y yaw=0
+            if (auto poseComp = _ecm.Component<gz::sim::components::Pose>(this->actorEntity_))
             {
-              const auto &w0 = this->targetPoses_.front();
-
-              // Pose: X=Y=0, Z desde YAML, yaw inicial (YAW del wp o default)
-              if (auto poseComp = _ecm.Component<gz::sim::components::Pose>(this->actorEntity_))
-              {
-                auto p = poseComp->Data();
-                p.Pos().X(0); p.Pos().Y(0); p.Pos().Z(w0.z);
-                const double yaw0 = w0.hasYaw ? w0.yaw : this->defaultRotation_;
-                p.Rot() = gz::math::Quaterniond(0, 0, yaw0);
-                *poseComp = gz::sim::components::Pose(p);
-                _ecm.SetChanged(this->actorEntity_, gz::sim::components::Pose::typeId,
-                                gz::sim::ComponentState::OneTimeChange);
-              }
-              else
-              {
-                gz::math::Pose3d p(0, 0, w0.z, 0, 0, w0.hasYaw ? w0.yaw : this->defaultRotation_);
-                _ecm.CreateComponent(this->actorEntity_, gz::sim::components::Pose(p));
-                _ecm.SetChanged(this->actorEntity_, gz::sim::components::Pose::typeId,
-                                gz::sim::ComponentState::OneTimeChange);
-              }
-
-              // TrajectoryPose: X/Y del primer waypoint, Z=0 (convención)
-              gz::math::Pose3d tp(w0.x, w0.y, 0, 0, 0, w0.hasYaw ? w0.yaw : this->defaultRotation_);
-              if (auto tpComp = _ecm.Component<gz::sim::components::TrajectoryPose>(this->actorEntity_))
-                *tpComp = gz::sim::components::TrajectoryPose(tp);
-              else
-                _ecm.CreateComponent(this->actorEntity_, gz::sim::components::TrajectoryPose(tp));
-              _ecm.SetChanged(this->actorEntity_, gz::sim::components::TrajectoryPose::typeId,
+              auto p = poseComp->Data();
+              p.Pos().X(0); p.Pos().Y(0);
+              p.Pos().Z(w0.z);
+              p.Rot() = gz::math::Quaterniond::Identity; // yaw=0
+              *poseComp = gz::sim::components::Pose(p);
+              _ecm.SetChanged(this->actorEntity_, gz::sim::components::Pose::typeId,
                               gz::sim::ComponentState::OneTimeChange);
-
-              // Arrancar desde el segundo waypoint (si existe)
-              this->idx_ = (this->targetPoses_.size() > 1) ? 1 : 0;
-
-              std::cout << "[AWF] Teleported to first waypoint: (" << w0.x << "," << w0.y << "," << w0.z
-                        << "), yaw=" << (w0.hasYaw ? w0.yaw : this->defaultRotation_)
-                        << ". Starting idx=" << this->idx_ << "\n";
+            }
+            else
+            {
+              gz::math::Pose3d p(0, 0, w0.z, 0, 0, 0); // yaw=0
+              _ecm.CreateComponent(this->actorEntity_, gz::sim::components::Pose(p));
+              _ecm.SetChanged(this->actorEntity_, gz::sim::components::Pose::typeId,
+                              gz::sim::ComponentState::OneTimeChange);
             }
 
-            break; // ya encontramos al actor objetivo
+            // TrajectoryPose → X,Y,yaw del primer WP (Z=0)
+            gz::math::Pose3d tp(w0.x, w0.y, 0, 0, 0, yaw0);
+            if (auto tpComp = _ecm.Component<gz::sim::components::TrajectoryPose>(this->actorEntity_))
+              *tpComp = gz::sim::components::TrajectoryPose(tp);
+            else
+              _ecm.CreateComponent(this->actorEntity_, gz::sim::components::TrajectoryPose(tp));
+            _ecm.SetChanged(this->actorEntity_, gz::sim::components::TrajectoryPose::typeId,
+                            gz::sim::ComponentState::OneTimeChange);
+
+            // Índice inicial de la ruta: si hay más de un waypoint, arrancamos hacia el 2º
+            this->idx_ = (this->targetPoses_.size() > 1) ? 1 : 0;
+            
+            if(print_debug){
+              std::cout << "[AWF] Teleported to first waypoint: ("
+                        << w0.x << "," << w0.y << "," << w0.z
+                        << "), yaw=" << yaw0
+                        << ". Starting idx=" << this->idx_ << "\n";
+            }
           }
 
-          if (!found)
-          {
-            std::cerr << "[ActorWaypointFollowerPlugin] No actor named '" << (this->actorNameOverride_.empty()? sceneActorName : this->actorNameOverride_)
-                      << "' in YAML file '" << this->yamlFile_ << "'.\n";
-          }
-          else
-          {
-            this->pathCompletedLogged_ = false;
+          break; // ya encontramos el actor objetivo
+        }
+
+        if (!found)
+        { 
+          std::cerr << "[ActorWaypointFollowerPlugin] No actor named '"
+                    << (this->actorNameOverride_.empty()? sceneActorName : this->actorNameOverride_)
+                    << "' in YAML file '" << this->yamlFile_ << "'.\n";
+        }
+        else
+        {
+          this->pathCompletedLogged_ = false;
+          if(print_debug){
             std::cout << "[ActorWaypointFollowerPlugin] Loaded " << this->targetPoses_.size()
-                      << " waypoints for '" << (this->actorNameOverride_.empty()? sceneActorName : this->actorNameOverride_)
+                      << " waypoints for '"
+                      << (this->actorNameOverride_.empty()? sceneActorName : this->actorNameOverride_)
                       << "' from " << this->yamlFile_ << "\n";
           }
         }
       }
-      catch (const std::exception &e)
-      {
-        std::cerr << "[ActorWaypointFollowerPlugin] Error reading YAML '" << this->yamlFile_
-                  << "': " << e.what() << "\n";
-      }
     }
-
-    this->lastUpdate_ = std::chrono::steady_clock::duration::zero();
+    catch (const std::exception &e)
+    {
+      std::cerr << "[ActorWaypointFollowerPlugin] Error reading YAML '" << this->yamlFile_
+                << "': " << e.what() << "\n";
+    }
   }
 
+  // 8) Inicializa tiempos internos
+  this->lastUpdate_ = std::chrono::steady_clock::duration::zero();
+}
 
-  // --- PreUpdate: lógica de orientación + traslación y avance de animación ---
-  void PreUpdate(const gz::sim::UpdateInfo &_info, gz::sim::EntityComponentManager &_ecm) override
+// --- PreUpdate: lógica de orientación + traslación y avance de animación ---
+void PreUpdate(const gz::sim::UpdateInfo &_info,
+               gz::sim::EntityComponentManager &_ecm) override
+{
+  if (_info.paused)
+    return;
+
+  // Forzamos modo path
+  if (this->followMode_ != "path")
+    this->followMode_ = "path";
+
+  auto trajPoseComp =
+      _ecm.Component<gz::sim::components::TrajectoryPose>(this->actorEntity_);
+  if (!trajPoseComp)
   {
-    if (_info.paused) return;
+    std::cout << "[AWF][WARN] TrajectoryPose missing; actor will not move via trajectory. Waiting...\n";
+    return;
+  }
 
-    if (this->followMode_ != "path") {
-      // Soporta "velocity" como el oficial si quisieras extender;
-      // aquí nos centramos en "path" (YAML).
-      this->followMode_ = "path";
-    }
+  // dt en segundos (double)
+  const double dt =
+      std::chrono::duration_cast<std::chrono::duration<double>>(_info.dt).count();
+  if (dt <= 0.0)
+    return;
 
-    auto trajPoseComp = _ecm.Component<gz::sim::components::TrajectoryPose>(this->actorEntity_);
-    if (!trajPoseComp) { // aún no inicializado
-      std::cout << "[AWF][WARN] TrajectoryPose missing; actor will not move via trajectory. Waiting...\n";
-      return;
-    }
+  const double dt_clamped = std::min(dt, 0.2); // máx 0.2 s por tick
 
-    // dt en segundos (double)
-    const double dt = std::chrono::duration_cast<std::chrono::duration<double>>(_info.dt).count();
-    // Opcional: clamp por seguridad ante saltos grandes (resets/pausas)
-    if (dt <= 0.0) return;
-    const double dt_clamped = std::min(dt, 0.2); // máx 0.2 s por tick
+  auto currentPose = trajPoseComp->Data();
+  gz::math::Pose3d newPose = currentPose;
+  double distanceTraveled = 0.0;
 
-    auto currentPose = trajPoseComp->Data();
-    gz::math::Pose3d newPose = currentPose;
-    double distanceTraveled = 0.0;
+  // Sin ruta cargada o terminada
+  if (this->targetPoses_.empty() ||
+      this->idx_ >= static_cast<int>(this->targetPoses_.size()))
+  {
+    return;
+  }
 
-    // Sin ruta cargada o terminada
-    if (this->targetPoses_.empty() || this->idx_ >= static_cast<int>(this->targetPoses_.size())) {
-      return;
-    }
+  // Waypoint objetivo actual
+  const Waypoint &wp = this->targetPoses_[this->idx_];
 
-    // Waypoint objetivo
-    const Waypoint &tgt = this->targetPoses_[this->idx_];
+  // Vector 2D hacia el target (posición)
+  gz::math::Vector2d target2d(wp.x, wp.y);
+  gz::math::Vector2d current2d(currentPose.Pos().X(), currentPose.Pos().Y());
+  gz::math::Vector2d delta = target2d - current2d;
+  double L = delta.Length();
 
-    // Vector 2D hacia el target
-    gz::math::Vector2d target2d(tgt.x, tgt.y);
-    gz::math::Vector2d current2d(currentPose.Pos().X(), currentPose.Pos().Y());
-    gz::math::Vector2d to = target2d - current2d;
-    double dist = to.Length();
+  // ¿Es un waypoint "solo de giro"? (misma posición)
+  const double posEps = 1e-3;
+  bool yawOnly = (L < posEps) && wp.hasYaw;
 
-    // ¿Llegamos?
-    if (dist < this->linTolerance_) {
-      // Orientación final si viene especificada
-      if (tgt.hasYaw) {
-        newPose.Rot() = gz::math::Quaterniond(0, 0, tgt.yaw);
-      }
-      // Siguiente
-      if (this->idx_ < static_cast<int>(this->targetPoses_.size()) - 1) {
-        this->idx_++;
-        std::cout << "[AWF] approaching final waypoint #" << this->idx_ << std::endl;
-        // No mover aún; aplicamos abajo un paso nulo este tick
-        to = gz::math::Vector2d::Zero;
-      } else {
-        if (!this->pathCompletedLogged_) {
-          std::cout << "[ActorWaypointFollowerPlugin] Path completed.\n";
-          this->pathCompletedLogged_ = true;
-        }
-        if (this->loop_) {
-          this->idx_ = 0;
-        } else {
-          // Mantener pose; salir
-          *trajPoseComp = gz::sim::components::TrajectoryPose(newPose);
-          _ecm.SetChanged(this->actorEntity_, gz::sim::components::TrajectoryPose::typeId, gz::sim::ComponentState::OneTimeChange);
-          return;
-        }
-      }
-      // Dentro del bloque if (dist < this->linTolerance_) { ... }
-          std::cout << "[AWF] Reached wp " << this->idx_
-          << " (dist=" << dist << "). "
-          << (this->idx_ < static_cast<int>(this->targetPoses_.size()) - 1 ? "Next → " + std::to_string(this->idx_+1)
-                                                                            : (this->loop_ ? "Looping → 0" : "Path end"))
-          << std::endl;
-    }
+  // --- orientación deseada ---
+  double yawNow = currentPose.Rot().Euler().Z();
+  double yawDesired = 0.0;
 
-    // Recalcular si cambiamos idx
-    const Waypoint &next = this->targetPoses_[this->idx_];
-    gz::math::Vector2d dir(next.x - currentPose.Pos().X(), next.y - currentPose.Pos().Y());
-    double L = dir.Length();
+  if (yawOnly)
+  {
+    // Si el waypoint sólo cambia yaw, el deseado es el yaw del wp
+    yawDesired = wp.yaw;
+  }
+  else
+  {
+    // Para waypoints con cambio de posición, mirar hacia el punto
+    yawDesired = std::atan2(delta.Y(), delta.X());
+  }
 
-    // --- orientación deseada ---
-    double yawNow    = currentPose.Rot().Euler().Z();
-    double yawDesired= std::atan2(dir.Y(), dir.X());
+  auto wrapPi = [](double a)
+  {
+    while (a > M_PI)  a -= 2.0 * M_PI;
+    while (a <= -M_PI) a += 2.0 * M_PI;
+    return a;
+  };
+  double yawDiff = wrapPi(yawDesired - yawNow);
 
-    // wrap a [-pi, pi)
-    auto wrapPi = [](double a){
-      while (a >  M_PI) a -= 2*M_PI;
-      while (a <= -M_PI) a += 2*M_PI;
-      return a;
-    };
-    double yawDiff = wrapPi(yawDesired - yawNow);
+  // Paso angular limitado por dt y angVelocity_
+  const double dt_s = dt_clamped;
+  double angStep = this->angVelocity_ * dt_s;
+  double yawStep = std::clamp(yawDiff, -angStep, angStep);
+  double newYaw  = yawNow + yawStep;
 
-    // rotar con límite por tick
-    const double dt_s = dt_clamped; // asumiendo que arriba ya calculaste dt_clamped (en segundos)
-    double angStep = this->angVelocity_ * dt_s;
-    double yawStep = std::clamp(yawDiff, -angStep, angStep);
-    double newYaw  = yawNow + yawStep;
+  // --- avance lineal ---
+  gz::math::Vector2d step = gz::math::Vector2d::Zero;
 
+  if (!yawOnly && L > 1e-6)
+  {
     // Escala de avance según alineación (0.1..1.0)
-    double align = std::cos(std::min(std::abs(yawDiff), M_PI));  // 1=mirando al target, -1=de espaldas
-    align = std::max(align, 0.1);                                // nunca 0: siempre empujamos algo
+    double align = std::cos(std::min(std::abs(yawDiff), M_PI)); // 1=mirando, -1=de espaldas
+    align = std::max(align, 0.1);                               // nunca 0
 
-    // Si quieres “afilar” el empuje, usa una curva suave:
-    auto smooth = [](double x){ return x*x*(3 - 2*x); };        // smoothstep
-    double gain = smooth((align - 0.1) / 0.9);                  // mapea [0.1,1] → [0,1]
-
-    // Paso lineal (¡sin gatear por headingOk!)
-    gz::math::Vector2d step = gz::math::Vector2d::Zero;
-    if (L > 1e-6)
+    auto smooth = [](double x)
     {
-      step = (dir / L) * (this->linVelocity_ * (0.3 + 0.7*gain)) * dt_s;
-      if (step.Length() > L) step = dir; // no pasarse
-      newPose.Pos().X() += step.X();
-      newPose.Pos().Y() += step.Y();
-      distanceTraveled = step.Length();
+      return x * x * (3 - 2 * x); // smoothstep
+    };
+    double gain = smooth((align - 0.1) / 0.9); // [0.1,1] → [0,1]
+
+    step = (delta / L) * (this->linVelocity_ * (0.3 + 0.7 * gain)) * dt_s;
+    if (step.Length() > L)
+      step = delta; // no pasarse
+
+    newPose.Pos().X() += step.X();
+    newPose.Pos().Y() += step.Y();
+    distanceTraveled = step.Length();
+  }
+  else
+  {
+    // Waypoint solo de giro o L≈0 → no movemos X/Y
+    newPose.Pos().X() = currentPose.Pos().X();
+    newPose.Pos().Y() = currentPose.Pos().Y();
+  }
+
+  // Z del waypoint actual
+  newPose.Pos().Z(wp.z);
+
+  // Rotación provisional
+  newPose.Rot() = gz::math::Quaterniond(0, 0, newYaw);
+
+  // --- criterios de llegada ---
+  bool posOk = (L < this->linTolerance_);
+  bool yawOk = (!wp.hasYaw) || (std::abs(yawDiff) < this->angTolerance_);
+
+  bool reached = false;
+
+  if (yawOnly)
+  {
+    // Waypoint de giro en el sitio: sólo importa el yaw
+    if (yawOk)
+      reached = true;
+  }
+  else
+  {
+    // Waypoint de traslación
+    if (posOk)
+    {
+      // Si tiene yaw, podemos exigir también yawOk para avanzar "fino"
+      if (!wp.hasYaw || yawOk)
+        reached = true;
     }
+  }
 
-    // Z del waypoint actual
-    newPose.Pos().Z(next.z);
+  if (reached)
+  {
+    // Ajustamos yaw EXACTO al del waypoint si viene especificado
+    if (wp.hasYaw)
+      newPose.Rot() = gz::math::Quaterniond(0, 0, wp.yaw);
 
-    // Rotación final: si el waypoint trae yaw, cuando estemos razonablemente alineados
-    bool almostAligned = std::abs(yawDiff) < this->angTolerance_;
-    newPose.Rot() = gz::math::Quaterniond(0, 0, (almostAligned && next.hasYaw) ? next.yaw : newYaw);
-
-    // LOG útil
-    if(print_debug){
-      std::cout << "[AWF] idx=" << this->idx_
-                << " cur=(" << currentPose.Pos().X() << "," << currentPose.Pos().Y() << "," << currentPose.Pos().Z() << ")"
-                << " yawNow=" << yawNow
-                << " tgt=(" << next.x << "," << next.y << "," << next.z << ")"
-                << " yawDes=" << yawDesired
-                << " dist=" << L
-                << " yawDiff=" << yawDiff
-              << std::endl;
+    if (this->idx_ < static_cast<int>(this->targetPoses_.size()) - 1)
+    {
+      if (print_debug)
+      {
+        std::cout << "[AWF] Reached wp " << this->idx_
+                  << " (posOk=" << posOk << ", yawOk=" << yawOk << "). Next -> "
+                  << (this->idx_ + 1) << std::endl;
+      }
+      this->idx_++;
     }
+    else
+    {
+      // Último waypoint
+      if (!this->pathCompletedLogged_)
+      {
+        std::cout << "[ActorWaypointFollowerPlugin] Path completed.\n";
+        this->pathCompletedLogged_ = true;
+      }
 
-    if (this->linVelocity_ <= 1e-6)
-      std::cout << "[AWF][WARN] linear_velocity ~ 0, no avanzará.\n";
-    if (this->angVelocity_ <= 1e-6)
-      std::cout << "[AWF][WARN] angular_velocity ~ 0, no podrá orientar.\n";
-    
-
-    // Aplicar
-    *trajPoseComp = gz::sim::components::TrajectoryPose(newPose);
-    _ecm.SetChanged(this->actorEntity_, gz::sim::components::TrajectoryPose::typeId, gz::sim::ComponentState::OneTimeChange);
-
-    // Avance de animación proporcional a la distancia (como el oficial)
-    if (distanceTraveled > 1e-5) {
-      auto animTimeComp = _ecm.Component<gz::sim::components::AnimationTime>(this->actorEntity_);
-      if (animTimeComp) {
-        auto animTime = animTimeComp->Data() + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
-            std::chrono::duration<double>(distanceTraveled * this->animationFactor_));
-        *animTimeComp = gz::sim::components::AnimationTime(animTime);
-        _ecm.SetChanged(this->actorEntity_, gz::sim::components::AnimationTime::typeId, gz::sim::ComponentState::OneTimeChange);
+      if (this->loop_)
+      {
+        if (print_debug)
+          std::cout << "[AWF] Looping path -> wp 0\n";
+        this->idx_ = 0;
+      }
+      else
+      {
+        // Mantener pose final y salir
+        *trajPoseComp = gz::sim::components::TrajectoryPose(newPose);
+        _ecm.SetChanged(this->actorEntity_,
+                        gz::sim::components::TrajectoryPose::typeId,
+                        gz::sim::ComponentState::OneTimeChange);
+        return;
       }
     }
   }
 
-  static bool ShouldPrint(const gz::sim::UpdateInfo &_info, double hz = 10.0)
+  if (print_debug)
   {
-    static std::chrono::steady_clock::duration lastPrint{std::chrono::steady_clock::duration::zero()};
-    const auto period = std::chrono::duration<double>(1.0 / hz);
-    if (_info.simTime - lastPrint >= std::chrono::duration_cast<std::chrono::steady_clock::duration>(period))
-    {
-      lastPrint = _info.simTime;
-      return true;
-    }
-    return false;
+    std::cout << "[AWF] idx=" << this->idx_
+              << " pos=(" << currentPose.Pos().X() << "," << currentPose.Pos().Y()
+              << "," << currentPose.Pos().Z() << ")"
+              << " -> new=(" << newPose.Pos().X() << "," << newPose.Pos().Y()
+              << "," << newPose.Pos().Z() << ")"
+              << " yawNow=" << yawNow
+              << " yawDes=" << yawDesired
+              << " yawDiff=" << yawDiff
+              << " L=" << L
+              << " yawOnly=" << std::boolalpha << yawOnly << std::noboolalpha
+              << std::endl;
   }
+
+  if (this->linVelocity_ <= 1e-6)
+    std::cout << "[AWF][WARN] linear_velocity ~ 0, no avanzará.\n";
+  if (this->angVelocity_ <= 1e-6)
+    std::cout << "[AWF][WARN] angular_velocity ~ 0, no podrá orientar.\n";
+
+  // Aplicar TrajectoryPose
+  *trajPoseComp = gz::sim::components::TrajectoryPose(newPose);
+  _ecm.SetChanged(this->actorEntity_,
+                  gz::sim::components::TrajectoryPose::typeId,
+                  gz::sim::ComponentState::OneTimeChange);
+
+  // Avance de animación proporcional a la distancia recorrida
+  if (distanceTraveled > 1e-5)
+  {
+    auto animTimeComp =
+        _ecm.Component<gz::sim::components::AnimationTime>(this->actorEntity_);
+    if (animTimeComp)
+    {
+      auto animTime =
+          animTimeComp->Data() +
+          std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+              std::chrono::duration<double>(distanceTraveled *
+                                            this->animationFactor_));
+      *animTimeComp = gz::sim::components::AnimationTime(animTime);
+      _ecm.SetChanged(this->actorEntity_,
+                      gz::sim::components::AnimationTime::typeId,
+                      gz::sim::ComponentState::OneTimeChange);
+    }
+  }
+}
+
+static bool ShouldPrint(const gz::sim::UpdateInfo &_info, double hz = 10.0)
+{
+  static std::chrono::steady_clock::duration lastPrint{std::chrono::steady_clock::duration::zero()};
+  const auto period = std::chrono::duration<double>(1.0 / hz);
+  if (_info.simTime - lastPrint >= std::chrono::duration_cast<std::chrono::steady_clock::duration>(period))
+  {
+    lastPrint = _info.simTime;
+    return true;
+  }
+  return false;
+}
 
 private:
   // --- Estado ---

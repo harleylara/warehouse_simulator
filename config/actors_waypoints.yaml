@@ -1,4 +1,46 @@
 actors:
+  - name: actor_walking_03
+    speed: 1.0                # opcional: override de linear_velocity
+    tolerance: 0.15           # o linear_tolerance: 0.15
+    angular_tolerance: 5.0    # grados (opcional)
+    loop: true
+    waypoints:
+      - {x: -6.3, y: 3.7, z: 0.5,   yaw: 0.0}
+      - {x: 0.0,  y: 3.7, z: 0.5,   yaw: 0.0}
+      - {x: 6.5,  y: 3.7, z: 0.5,   yaw: 0.0}
+      - {x: 11.3, y: 3.7, z: 0.5,   yaw: 0.0}
+      - {x: 12.8, y: 3.7, z: 0.5,   yaw: 0.0}
+      - {x: 12.8, y: 3.7, z: 0.5,   yaw: 90.0}
+      - {x: 12.8, y: 3.7, z: 0.5,   yaw: 180.0}
+      - {x: 11.3, y: 3.7, z: 0.5,   yaw: 180.0}
+      - {x: 11.3, y: 3.7, z: 0.5,   yaw: 90.0}
+      - {x: 11.3, y: 10.2, z: 0.5,  yaw: 90.0}
+      - {x: 11.3, y: 10.2, z: 0.5,  yaw: 0.0}
+      - {x: 11.3, y: 10.2, z: 0.5,  yaw: -90.0}
+      - {x: 11.3, y: 3.7, z: 0.5,   yaw: -90.0}
+      - {x: 11.3, y: 3.7, z: 0.5,   yaw: 180.0}
+      - {x: 6.5,  y: 3.7, z: 0.5,   yaw: 180.0}
+      - {x: 0.0,  y: 3.7, z: 0.5,   yaw: 180.0}
+      - {x: -6.3, y: 3.7, z: 0.5,   yaw: 180.0}
+      - {x: -6.3, y: 3.7, z: 0.5,   yaw: 90.0}
+      
+  - name: actor_walking_04
+    speed: 1.0                # opcional: override de linear_velocity
+    tolerance: 0.15           # o linear_tolerance: 0.15
+    angular_tolerance: 5.0    # grados (opcional)
+    loop: true
+    waypoints:
+      - {x: 6.5,    y: 6.9, z: 0.5, yaw: 180.0}
+      - {x: 0.0,    y: 6.9, z: 0.5, yaw: 180.0}
+      - {x: -6.5,   y: 6.9, z: 0.5, yaw: 180.0}
+      - {x: -4.5,   y: 6.9, z: 0.5, yaw: 180.0}
+      - {x: -4.5,   y: 6.9, z: 0.5, yaw: 90.0}
+      - {x: -4.5,   y: 6.9, z: 0.5, yaw: 0.0}
+      - {x: -6.5,   y: 6.9, z: 0.5, yaw: 0.0}
+      - {x: 0.0,    y: 6.9, z: 0.5, yaw: 0.0}
+      - {x: 6.5,    y: 6.9, z: 0.5, yaw: 0.0}
+      - {x: 6.5,    y: 6.9, z: 0.5, yaw: 90.0}
+
   - name: actor_walking_05
     speed: 1.0                # opcional: override de linear_velocity
     tolerance: 0.15           # o linear_tolerance: 0.15
@@ -18,4 +60,255 @@ actors:
       - {x: -6.3, y: 10.2, z: 0.5, yaw: 180.0}
       - {x: -6.3, y: 10.2, z: 0.5, yaw: 90.0}
 
+  - name: actor_walking_06
+    speed: 1.0                # opcional: override de linear_velocity
+    tolerance: 0.15           # o linear_tolerance: 0.15
+    angular_tolerance: 5.0    # grados (opcional)
+    loop: true
+    waypoints:
+      - {x: 4.3,    y: 11.3, z: 0.5, yaw: 180.0}
+      - {x: 3.1,    y: 11.3, z: 0.5, yaw: 180.0}
+      - {x: 3.1,    y: 11.3, z: 0.5, yaw: 90.0}
+      - {x: 3.1,    y: 12.2, z: 0.5, yaw: 90.0}
+      - {x: 3.1,    y: 12.2, z: 0.5, yaw: 0.0}
+      - {x: 3.1,    y: 12.2, z: 0.5, yaw: 270.0}
+      - {x: 3.1,    y: 11.3, z: 0.5, yaw: 270.0}
+      - {x: 3.1,    y: 11.3, z: 0.5, yaw: 180.0}
+      - {x: -6.2,    y: 11.3, z: 0.5, yaw: 180.0}
+      - {x: -6.2,    y: 11.3, z: 0.5, yaw: 90.0}
+      - {x: -6.2,    y: 12.2, z: 0.5, yaw: 90.0}
+      - {x: -6.2,    y: 12.2, z: 0.5, yaw: 0.0}
+      - {x: -6.2,    y: 12.2, z: 0.5, yaw: 270.0}
+      - {x: -6.2,    y: 11.3, z: 0.5, yaw: 270.0}
+      - {x: 4.3,    y: 11.3, z: 0.5, yaw: 0.0}
 
+  - name: actor_walking_07
+    speed: 1.0                # opcional: override de linear_velocity
+    tolerance: 0.15           # o linear_tolerance: 0.15
+    angular_tolerance: 5.0    # grados (opcional)
+    loop: true
+    waypoints:
+      - {x: 3.1,    y: 13.6, z: 0.5, yaw: 180.0}
+      - {x: -4.8,   y: 13.6, z: 0.5, yaw: 180.0}
+      - {x: -4.8,   y: 13.6, z: 0.5, yaw: 90.0}
+      - {x: -4.8,   y: 13.6, z: 0.5, yaw: 0.0}
+      - {x: 3.1,    y: 13.6, z: 0.5, yaw: 0.0}
+      - {x: 3.1,    y: 13.6, z: 0.5, yaw: 90.0}
+
+  - name: actor_walking_08
+    speed: 1.0                # opcional: override de linear_velocity
+    tolerance: 0.15           # o linear_tolerance: 0.15
+    angular_tolerance: 5.0    # grados (opcional)
+    loop: true
+    waypoints:
+      - {x: 6.0,   y: 13.6, z: 0.5, yaw: 90.0}
+      - {x: 6.0,   y: 15.8, z: 0.5, yaw: 90.0}
+      - {x: 6.0,   y: 15.8, z: 0.5, yaw: 180.0}
+      - {x: 3.1,   y: 15.8, z: 0.5, yaw: 180.0}
+      - {x: 3.1,   y: 15.8, z: 0.5, yaw: 270.0}
+      - {x: 3.1,   y: 14.6, z: 0.5, yaw: 180.0}
+      - {x: -4.8,  y: 14.6, z: 0.5, yaw: 180.0}
+      - {x: -4.8,  y: 14.6, z: 0.5, yaw: 90.0}
+      - {x: -4.8,  y: 15.8, z: 0.5, yaw: 90.0}
+      - {x: -4.8,  y: 15.8, z: 0.5, yaw: 180.0}
+      - {x: -6.5,  y: 15.8, z: 0.5, yaw: 180.0}
+      - {x: -6.5,  y: 15.8, z: 0.5, yaw: 0.0}
+      - {x: 6.0,   y: 15.8, z: 0.5, yaw: 0.0}
+      - {x: 6.0,   y: 11.6, z: 0.5, yaw: 270.0}
+
+  - name: actor_walking_09    
+    speed: 1.0                
+    tolerance: 0.15           
+    angular_tolerance: 5.0    
+    loop: true
+    waypoints:
+      - {x: 13.8,   y: -22.7, z: 0.5, yaw: 180.0}
+      - {x: 7.6,   y: -22.7, z: 0.5, yaw: 180.0}
+      - {x: 7.6,   y: -22.7, z: 0.5, yaw: 90.0}
+      - {x: 7.6,   y: -22.7, z: 0.5, yaw: 0.0}
+      - {x: 13.8,   y: -22.7, z: 0.5, yaw: 0.0}
+      - {x: 13.8,   y: -22.7, z: 0.5, yaw: 90.0}
+
+  - name: actor_walking_10
+    speed: 1.0                
+    tolerance: 0.15           
+    angular_tolerance: 5.0    
+    loop: true
+    waypoints:
+      - {x: 7.6,    y: -19.8,   z: 0.5, yaw: 0.0}
+      - {x: 13.8,   y: -19.8,   z: 0.5, yaw: 0.0}
+      - {x: 13.8,   y: -19.8,   z: 0.5, yaw: 90.0}
+      - {x: 13.8,   y: -19.8,   z: 0.5, yaw: 180.0}
+      - {x: 7.6,    y: -19.8,   z: 0.5, yaw: 0.0}
+      - {x: 7.6,    y: -19.8,   z: 0.5, yaw: 90.0}
+
+  - name: actor_walking_11
+    speed: 1.0                
+    tolerance: 0.15           
+    angular_tolerance: 5.0    
+    loop: true
+    waypoints:
+      - {x: 13.8,   y: -17.5,   z: 0.5, yaw: 180.0}
+      - {x: 7.6,    y: -17.5,   z: 0.5, yaw: 180.0}
+      - {x: 7.6,    y: -17.5,   z: 0.5, yaw: 90.0}
+      - {x: 7.6,    y: -17.5,   z: 0.5, yaw: 0.0}
+      - {x: 13.8,   y: -17.5,   z: 0.5, yaw: 0.0}
+      - {x: 13.8,   y: -17.5,   z: 0.5, yaw: 90.0}
+
+  - name: actor_walking_12
+    speed: 1.0                
+    tolerance: 0.15           
+    angular_tolerance: 5.0    
+    loop: true
+    waypoints:
+      - {x: 8.7,    y: -15.2,   z: 0.5, yaw: 0.0}
+      - {x: 13.8,   y: -15.2,   z: 0.5, yaw: 0.0}
+      - {x: 13.8,   y: -15.2,   z: 0.5, yaw: 90.0}
+      - {x: 13.8,   y: -15.2,   z: 0.5, yaw: 180.0}
+      - {x: 8.7,    y: -15.2,   z: 0.5, yaw: 0.0}
+      - {x: 8.7,    y: -15.2,   z: 0.5, yaw: 90.0}
+
+  - name: actor_walking_13
+    speed: 1.0                
+    tolerance: 0.15           
+    angular_tolerance: 5.0    
+    loop: true
+    waypoints:
+      - {x: 7.8,   y: -4.6,   z: 0.5,   yaw: 270.0}
+      - {x: 7.8,   y: -12.7,  z: 0.5,   yaw: 270.0}
+      - {x: 7.8,   y: -12.7,  z: 0.5,   yaw: 0.0}
+      - {x: 13.8,  y: -12.7,  z: 0.5,   yaw: 0.0}
+      - {x: 13.8,  y: -12.7,  z: 0.5,   yaw: 90.0}
+      - {x: 13.8,  y: -12.7,  z: 0.5,   yaw: 180.0}
+
+# Actor in initial long corridors
+  - name: actor_walking_14
+    speed: 1.0                
+    tolerance: 0.15           
+    angular_tolerance: 5.0    
+    loop: true
+    waypoints:
+      - {x: 4.0,   y: -19.6,    z: 0.5,   yaw: 90.0}
+      - {x: 4.0,   y: -12.7,    z: 0.5,   yaw: 90.0}
+      - {x: 4.0,   y: -12.7,    z: 0.5,   yaw: 180.0}
+      - {x: 4.0,   y: -12.7,    z: 0.5,   yaw: 270.0}
+      - {x: 4.0,   y: -19.6,    z: 0.5,   yaw: 270.0}
+      - {x: 4.0,   y: -19.6,    z: 0.5,   yaw: 0.0}
+
+  - name: actor_walking_15
+    speed: 1.0                
+    tolerance: 0.15           
+    angular_tolerance: 5.0    
+    loop: true
+    waypoints:
+      - {x: 4.0,   y: -5.6,    z: 0.5,   yaw: 270.0}
+      - {x: 4.0,   y: -12.1,    z: 0.5,   yaw: 270.0}
+      - {x: 4.0,   y: -12.1,    z: 0.5,   yaw: 180.0}
+      - {x: 4.0,   y: -12.1,    z: 0.5,   yaw: 90.0}
+      - {x: 4.0,   y: -5.6,    z: 0.5,   yaw: 90.0}
+      - {x: 4.0,   y: -5.6,    z: 0.5,   yaw: 0.0}
+
+  - name: actor_walking_16
+    speed: 1.0                
+    tolerance: 0.15           
+    angular_tolerance: 5.0    
+    loop: true
+    waypoints:
+      - {x: 2.3,   y: -12.6,    z: 0.5,   yaw: 90.0}
+      - {x: 2.3,   y: -19.7,    z: 0.5,   yaw: 90.0}
+      - {x: 2.3,   y: -19.7,    z: 0.5,   yaw: 0.0}
+      - {x: 2.3,   y: -19.7,    z: 0.5,   yaw: 270.0}
+      - {x: 2.3,   y: -12.6,    z: 0.5,   yaw: 270.0}
+      - {x: 2.3,   y: -12.6,    z: 0.5,   yaw: 0.0}
+
+  - name: actor_walking_17
+    speed: 1.0                
+    tolerance: 0.15           
+    angular_tolerance: 5.0    
+    loop: true
+    waypoints:
+      - {x: 2.3,   y: -12.1,    z: 0.5,   yaw: 270.0}
+      - {x: 2.3,   y: -5.5,     z: 0.5,   yaw: 270.0}
+      - {x: 2.3,   y: -5.5,     z: 0.5,   yaw: 0.0}
+      - {x: 2.3,   y: -5.5,     z: 0.5,   yaw: 90.0}
+      - {x: 2.3,   y: -12.1,    z: 0.5,   yaw: 90.0}
+      - {x: 2.3,   y: -12.1,    z: 0.5,   yaw: 0.0}
+
+
+  - name: actor_walking_18
+    speed: 1.0                
+    tolerance: 0.15           
+    angular_tolerance: 5.0    
+    loop: true
+    waypoints:
+      - {x: -1.6,   y: -13.5,   z: 0.5,   yaw: 90.0}
+      - {x: -1.6,   y: -19.7,   z: 0.5,   yaw: 90.0}
+      - {x: -1.6,   y: -19.7,   z: 0.5,   yaw: 0.0}
+      - {x: -1.6,   y: -19.7,   z: 0.5,   yaw: 270.0}
+      - {x: -1.6,   y: -13.5,   z: 0.5,   yaw: 270.0}
+      - {x: -1.6,   y: -13.5,   z: 0.5,   yaw: 0.0}
+
+  - name: actor_walking_19
+    speed: 1.0                
+    tolerance: 0.15           
+    angular_tolerance: 5.0    
+    loop: true
+    waypoints:
+      - {x: -1.6,   y: -13.0,   z: 0.5,   yaw: 270.0}
+      - {x: -1.6,   y: -6.0,   z: 0.5,   yaw: 270.0}
+      - {x: -1.6,   y: -6.0,   z: 0.5,   yaw: 0.0}
+      - {x: -1.6,   y: -6.0,   z: 0.5,   yaw: 90.0}
+      - {x: -1.6,   y: -13.0,   z: 0.5,   yaw: 0.0}
+
+  - name: actor_walking_20
+    speed: 1.0                
+    tolerance: 0.15           
+    angular_tolerance: 5.0    
+    loop: true
+    waypoints:
+      - {x: -4.0,   y: -19.6,  z: 0.5,   yaw: 270.0}
+      - {x: -4.0,   y: -12.5,  z: 0.5,   yaw: 270.0}
+      - {x: -4.0,   y: -12.5,  z: 0.5,   yaw: 0.0}
+      - {x: -4.0,   y: -12.5,  z: 0.5,   yaw: 90.0}
+      - {x: -4.0,   y: -19.6,  z: 0.5,   yaw: 90.0}
+      - {x: -4.0,   y: -19.6,  z: 0.5,   yaw: 0.0}
+
+
+  - name: actor_walking_21
+    speed: 1.0                
+    tolerance: 0.15           
+    angular_tolerance: 5.0    
+    loop: true
+    waypoints:
+      - {x: -4.0,   y: -4.9,   z: 0.5,   yaw: 90.0}
+      - {x: -4.0,   y: -12.0,  z: 0.5,   yaw: 90.0}
+      - {x: -4.0,   y: -12.0,  z: 0.5,   yaw: 0.0}
+      - {x: -4.0,   y: -12.0,  z: 0.5,   yaw: 270.0}
+      - {x: -4.0,   y: -4.9,   z: 0.5,   yaw: 270.0}
+      - {x: -4.0,   y: -4.9,   z: 0.5,   yaw: 0.0}
+
+  - name: actor_walking_22
+    speed: 1.0                
+    tolerance: 0.15           
+    angular_tolerance: 5.0    
+    loop: true
+    waypoints:
+      - {x: -8.1,   y: -14.0,   z: 0.5,   yaw: 270.0}
+      - {x: -8.1,   y: -20.7,   z: 0.5,   yaw: 270.0}
+      - {x: -8.1,   y: -20.7,   z: 0.5,   yaw: 0.0}
+      - {x: -8.1,   y: -20.7,   z: 0.5,   yaw: 90.0}
+      - {x: -8.1,   y: -14.0,   z: 0.5,   yaw: 90.0}
+      - {x: -8.1,   y: -14.0,   z: 0.5,   yaw: 0.0}
+
+  - name: actor_walking_23
+    speed: 1.0                
+    tolerance: 0.15           
+    angular_tolerance: 5.0    
+    loop: true
+    waypoints:
+      - {x: -8.1,   y: -13.0,   z: 0.5,   yaw: 270.0}
+      - {x: -8.1,   y: -4.7,    z: 0.5,   yaw: 270.0}
+      - {x: -8.1,   y: -4.7,    z: 0.5,   yaw: 0.0}
+      - {x: -8.1,   y: -4.7,    z: 0.5,   yaw: 90.0}
+      - {x: -8.1,   y: -13.0,   z: 0.5,   yaw: 90.0}
+      - {x: -8.1,   y: -13.0,   z: 0.5,   yaw: 0.0}
