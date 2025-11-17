@@ -129,7 +129,7 @@
               <property key="state" type="string">docked_collapsed</property>
           </ignition-gui>
       </plugin>
-      <plugin filename="Teleop" name="Teleop">
+      <!-- <plugin filename="Teleop" name="Teleop">
           <ignition-gui>
               <property key="x" type="double">0</property>
               <property key="y" type="double">0</property>
@@ -138,7 +138,7 @@
               <property key="state" type="string">docked</property>
           </ignition-gui>
           <topic>/model/tugbot/cmd_vel</topic>
-      </plugin>
+      </plugin> -->
     </gui>
 
     <scene>

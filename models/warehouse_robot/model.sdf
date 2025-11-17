@@ -2,7 +2,8 @@
 <sdf version="1.6">
   <model name="warehouse_robot">
     <static>false</static>
-    <link name="link">
+    <!-- base_link (robot body) -->
+    <link name="base_link">
       <visual name="visual">
         <geometry>
           <mesh>
@@ -44,17 +45,297 @@
           </cylinder>
         </geometry>
       </collision>
+      <!-- ======================= -->
+      <!-- Sensors: Camera, Lidar, IMU -->
+      <!-- ======================= -->
+      <!-- FRONT CAMERA -->
+      <sensor name="front_camera" type="camera">
+        <!-- Relativa Pose to base_link -->
+        <pose>0.3 0 0.4 0 0 0</pose>
+        <update_rate>30</update_rate>
+        <always_on>true</always_on>
+        <visualize>true</visualize>
+        <topic>/robot/camera/image</topic> <!-- Topic in Gazebo -->
+        <camera>
+          <horizontal_fov>1.047</horizontal_fov> <!-- ~60° -->
+          <image>
+            <width>640</width>
+            <height>480</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>50.0</far>
+          </clip>
+        </camera>
+        <gz_frame_id>base_link</gz_frame_id>
+      </sensor>
+      <!-- LIDAR 2D (type “planar”  360°) -->
+      <sensor name="lidar_2d" type="gpu_lidar">
+        <pose>0.2 0 0.25 0 0 0</pose>
+        <update_rate>20</update_rate>
+        <always_on>true</always_on>
+        <visualize>true</visualize>
+        <topic>/robot/lidar2d/scan</topic>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>920</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14159</min_angle>
+              <max_angle>3.14159</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.04</min>
+            <max>25</max>
+            <resolution>0.03</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.01</stddev>
+          </noise>
+        </lidar>
+        <gz_frame_id>base_link</gz_frame_id>
+      </sensor>
+      <!-- LIDAR 3D (type Velodyne / Ouster simple) -->
+      <sensor name="lidar_3d" type="gpu_lidar">
+        <pose>0.0 0 1.5 0 0 0</pose>
+        <update_rate>10</update_rate>
+        <always_on>true</always_on>
+        <visualize>true</visualize>
+        <topic>/robot/lidar3d</topic>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>1024</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14159</min_angle>
+              <max_angle>3.14159</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>64</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.2897</min_angle>
+              <max_angle>0.2897</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.8</min>
+            <max>20</max>
+            <resolution>0.003</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.03</stddev>
+          </noise>
+        </lidar>
+        <gz_frame_id>base_link</gz_frame_id>
+      </sensor>
+      <!-- IMU -->
+      <sensor name="imu" type="imu">
+        <pose>0 0 0.2 0 0 0</pose>
+        <update_rate>100</update_rate>
+        <always_on>true</always_on>
+        <topic>/robot/imu</topic>
+        <imu>
+        </imu>
+        <gz_frame_id>base_link</gz_frame_id>
+      </sensor>
     </link>
-    <plugin
-      filename="libRandomRobotMovementPlugin.so"
-      name="gz::sim::systems::RandomRobotMovementPlugin">
-      <model_name>warehouse_robot</model_name>
-      <ws_min_x>-10.0</ws_min_x>
-      <ws_max_x>10.0</ws_max_x>
-      <ws_min_y>-10.0</ws_min_y>
-      <ws_max_y>10.0</ws_max_y>
-      <speed>0.8</speed>
-      <turn_rate>0.4</turn_rate>
+    <!-- ======================= -->
+    <!-- Ruedas: links + joints  -->
+    <!-- ======================= -->
+    <!-- FRONT LEFT WHEEL -->
+    <link name="left_front_wheel_link">
+      <pose>0.25 0.26 0.129 0 1.57 0</pose>
+      <inertial>
+        <mass>1.0</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+      </inertial>
+      <collision name="left_front_wheel_collision">
+        <geometry>
+          <cylinder>
+            <radius>0.129</radius>
+            <length>0.05</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="left_front_wheel_visual">
+        <geometry>
+          <cylinder>
+            <radius>0.129</radius>
+            <length>0.05</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name="left_front_wheel" type="revolute">
+      <parent>base_link</parent>
+      <child>left_front_wheel_link</child>
+      <pose>0 0 0 0 0 0</pose>
+        <axis>
+            <xyz>0 0 1</xyz>
+            <limit>
+              <lower>-1.79769e+308</lower>
+              <upper>1.79769e+308</upper>
+            </limit>
+        </axis>
+    </joint>
+    <!-- REAR LEFT WHEEL -->
+    <link name="left_rear_wheel_link">
+      <pose>-0.25 0.26 0.129 0 1.57 0</pose>
+      <inertial>
+        <mass>1.0</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+      </inertial>
+      <collision name="left_rear_wheel_collision">
+        <geometry>
+          <cylinder>
+            <radius>0.129</radius>
+            <length>0.05</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="left_rear_wheel_visual">
+        <geometry>
+          <cylinder>
+            <radius>0.129</radius>
+            <length>0.05</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name="left_rear_wheel" type="revolute">
+      <parent>base_link</parent>
+      <child>left_rear_wheel_link</child>
+      <pose>0 0 0 0 0 0</pose>
+         <axis>
+            <xyz>0 0 1</xyz>
+            <limit>
+              <lower>-1.79769e+308</lower>
+              <upper>1.79769e+308</upper>
+            </limit>
+        </axis>
+    </joint>
+    <!-- FRONT RIGHT WHEEL -->
+    <link name="right_front_wheel_link">
+      <pose>0.25 -0.26 0.129 0 1.57 0</pose>
+      <inertial>
+        <mass>1.0</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+      </inertial>
+      <collision name="right_front_wheel_collision">
+        <geometry>
+          <cylinder>
+            <radius>0.129</radius>
+            <length>0.05</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="right_front_wheel_visual">
+        <geometry>
+          <cylinder>
+            <radius>0.129</radius>
+            <length>0.05</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name="right_front_wheel" type="revolute">
+      <parent>base_link</parent>
+      <child>right_front_wheel_link</child>
+      <pose>0 0 0 0 0 0</pose>
+        <axis>
+            <xyz>0 0 1</xyz>
+            <limit>
+              <lower>-1.79769e+308</lower>
+              <upper>1.79769e+308</upper>
+            </limit>
+        </axis>
+    </joint>
+    <!-- REAR RIGHT WHEEL -->
+    <link name="right_rear_wheel_link">
+      <pose>-0.25 -0.26 0.129 0 1.57 0</pose>
+      <inertial>
+        <mass>1.0</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+      </inertial>
+      <collision name="right_rear_wheel_collision">
+        <geometry>
+          <cylinder>
+            <radius>0.129</radius>
+            <length>0.05</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="right_rear_wheel_visual">
+        <geometry>
+          <cylinder>
+            <radius>0.129</radius>
+            <length>0.05</length>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name="right_rear_wheel" type="revolute">
+      <parent>base_link</parent>
+      <child>right_rear_wheel_link</child>
+      <pose>0 0 0 0 0 0</pose>
+         <axis>
+            <xyz>0 0 1</xyz>
+            <limit>
+              <lower>-1.79769e+308</lower>
+              <upper>1.79769e+308</upper>
+            </limit>
+        </axis>
+    </joint>
+    <!-- ======================= -->
+    <!-- Plugin DiffDrive        -->
+    <!-- ======================= -->
+    <plugin filename="libignition-gazebo-diff-drive-system.so" name="ignition::gazebo::systems::DiffDrive">
+      <left_joint>left_front_wheel</left_joint>
+      <left_joint>left_rear_wheel</left_joint>
+      <right_joint>right_front_wheel</right_joint>
+      <right_joint>right_rear_wheel</right_joint>
+      <wheel_separation>0.52</wheel_separation>
+      <wheel_radius>0.129</wheel_radius>
+      <odom_publish_frequency>10</odom_publish_frequency>
+      <topic>/robot/cmd_vel</topic>
+      <odom_topic>/robot/odometry</odom_topic>
+      <tf_topic>/robot/tf_odom_to_baselink</tf_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>/base_link</child_frame_id>
     </plugin>
   </model>
 </sdf>

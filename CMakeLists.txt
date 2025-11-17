@@ -41,7 +41,7 @@ else()
 endif()
 
 # Instalar carpetas de recursos
-foreach(dir launch worlds config models)
+foreach(dir launch worlds config models viz)
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${dir})
     install(
       DIRECTORY ${dir}/
