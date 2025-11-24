@@ -8,7 +8,11 @@ from launch.actions import (
 )
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.conditions import IfCondition, UnlessCondition
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import (
+    LaunchConfiguration,
+    PathJoinSubstitution,
+    PythonExpression,
+)
 from ament_index_python.packages import get_package_share_directory, get_package_prefix
 from launch_ros.actions import Node
 
@@ -18,20 +22,43 @@ def generate_launch_description():
     pkg_install_path = get_package_prefix('warehouse_simulator')
     models_path = os.path.join(pkg_share_path, 'models')
     lib_path = os.path.join(pkg_install_path, 'lib')
-    world_path = os.path.join(pkg_share_path, 'worlds', 'tugbot_warehouse.sdf')
-    yaml_path = os.path.join(pkg_share_path, 'config', 'actors_waypoints.yaml')
-    rviz_config_path = os.path.join(pkg_share_path, 'viz', 'viz_warehouse.rviz')
 
-    # === Launch argument: showing or not the GUI ===
+    # === Launch argument: GUI sí/no ===
     gui_arg = DeclareLaunchArgument(
         'gui',
-        default_value='true',  # by default with GUI
-        description=(
-            'If true, run Gazebo with GUI. '
-            'If false, run in server-only mode (-s, no GUI).'
-        )
+        default_value='true',
+        description='If true, run Gazebo with GUI. If false, run server-only (-s).'
     )
     gui = LaunchConfiguration('gui')
+
+    # === Launch argument: nombre de mundo SIN extensión ===
+    #   Ejemplos de uso:
+    #     world_name:=warehouse_full   -> warehouse_full.sdf
+    #     world_name:=warehouse_02     -> warehouse_02.sdf
+    #     world_name:=empty_with_robot -> empty_with_robot.sdf
+    world_name_arg = DeclareLaunchArgument(
+        'world_name',
+        default_value='warehouse_full',
+        description='World name (without .sdf) located in the worlds/ folder.'
+    )
+    world_name = LaunchConfiguration('world_name')
+
+    # Genera una expresión tipo: 'warehouse_full.sdf'
+    world_file = PythonExpression([
+        "'",
+        world_name,
+        ".sdf'"
+    ])
+
+    # Ruta absoluta al mundo dentro del paquete
+    world_path = PathJoinSubstitution([
+        pkg_share_path,
+        'worlds',
+        world_file
+    ])
+
+    yaml_path = os.path.join(pkg_share_path, 'config', 'actors_waypoints.yaml')
+    rviz_config_path = os.path.join(pkg_share_path, 'viz', 'viz_warehouse.rviz')
 
     # === Environment variables ===
     set_yaml = SetEnvironmentVariable(
@@ -72,13 +99,11 @@ def generate_launch_description():
     )
 
     # === GAZEBO SIM with GUI ===
-    # -r to star simulation running (can be remove if you want star paused)
     gz_launch_gui = IncludeLaunchDescription(
         gz_sim_launch_source,
         condition=IfCondition(gui),
         launch_arguments={
-            # CON GUI
-            'gz_args': f'-r {world_path}'
+            'gz_args': ['-r ', world_path]
         }.items()
     )
 
@@ -87,8 +112,7 @@ def generate_launch_description():
         gz_sim_launch_source,
         condition=UnlessCondition(gui),
         launch_arguments={
-            # without GUI: -s (server only) + -r doesnt begin in pause
-            'gz_args': f'-r -s {world_path}'
+            'gz_args': ['-r -s ', world_path]
         }.items()
     )
 
@@ -117,6 +141,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         gui_arg,
+        world_name_arg,
         set_yaml,
         set_plugin_path,
         set_ign,
