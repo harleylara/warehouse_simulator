@@ -2,9 +2,9 @@
 <sdf version="1.6">
   <model name="warehouse_robot">
     <static>false</static>
-    <!-- base_link (robot body) -->
     <link name="base_link">
       <visual name="visual">
+        <pose>0 0 0.0 0 0 -1.5708</pose>
         <geometry>
           <mesh>
             <uri>meshes/robot.dae</uri>
@@ -45,30 +45,32 @@
           </cylinder>
         </geometry>
       </collision>
+      <!-- IMU -->
+      <sensor name="imu" type="imu">
+        <pose>0 0 0.2 0 0 0</pose>
+        <update_rate>100</update_rate>
+        <always_on>true</always_on>
+        <topic>/robot/imu</topic>
+        <imu>
+        </imu>
+        <gz_frame_id>base_link</gz_frame_id>
+      </sensor>
+    </link>
+
+    <!-- ======================= -->
+    <!-- Sensors: Camera, Lidar, IMU -->
+    <!-- ======================= -->
+    <link name="camera_rgbd_link">
       <visual name="visual_camera">
-        <pose>0 -0.37 0.86 0 0 0</pose>
+        <pose>-0.2 0 0.86 0 0 1.5708</pose>
         <geometry>
           <mesh>
             <uri>model://rgbd_camera/meshes/3dCamera.dae</uri>
           </mesh>
         </geometry>
       </visual>
-      <visual name="visual_lidar2d">
-        <pose>0 -0.42 0.415 0 0 0</pose>
-        <geometry>
-          <mesh>
-            <uri>model://lidar_2d/meshes/lidar_2d.dae</uri>
-          </mesh>
-        </geometry>
-      </visual>
-      
-      <!-- ======================= -->
-      <!-- Sensors: Camera, Lidar, IMU -->
-      <!-- ======================= -->
-      <!-- FRONT CAMERA -->
       <sensor name="front_camera" type="camera">
-        <!-- Relativa Pose to base_link -->
-        <pose>0 -0.37 0.86 0 0 -1.5708</pose>
+        <pose>-0.2 0 0.86 0 0 0</pose>
         <update_rate>30</update_rate>
         <always_on>true</always_on>
         <visualize>true</visualize>
@@ -85,40 +87,20 @@
             <far>50.0</far>
           </clip>
         </camera>
-        <gz_frame_id>base_link</gz_frame_id>
+        <gz_frame_id>camera_rgbd_link</gz_frame_id>
       </sensor>
-      <!-- LIDAR 2D (type “planar”  360°) -->
-      <sensor name="lidar_2d" type="gpu_lidar">
-        <pose>0.0 0 0.25 0 0 0</pose>
-        <update_rate>20</update_rate>
-        <always_on>true</always_on>
-        <visualize>true</visualize>
-        <topic>/robot/lidar2d/scan</topic>
-        <lidar>
-          <scan>
-            <horizontal>
-              <samples>920</samples>
-              <resolution>1</resolution>
-              <min_angle>-3.14159</min_angle>
-              <max_angle>3.14159</max_angle>
-            </horizontal>
-          </scan>
-          <range>
-            <min>0.5</min>
-            <max>10</max>
-            <resolution>0.03</resolution>
-          </range>
-          <noise>
-            <type>gaussian</type>
-            <mean>0</mean>
-            <stddev>0.01</stddev>
-          </noise>
-        </lidar>
-        <gz_frame_id>base_link</gz_frame_id>
-      </sensor>
+    </link>
+    <link name="lidar_3d_link">
+      <pose>-0.25 0 0.9 0 0 0</pose>
+      <visual name="visual_lidar3d">
+        <geometry>
+          <mesh>
+            <uri>model://lidar_3d/meshes/lidar_3d.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
       <!-- LIDAR 3D (type Velodyne / Ouster simple) -->
       <sensor name="lidar_3d" type="gpu_lidar">
-        <pose>0.0 0 1.5 0 0 0</pose>
         <update_rate>10</update_rate>
         <always_on>true</always_on>
         <visualize>true</visualize>
@@ -149,25 +131,52 @@
             <stddev>0.03</stddev>
           </noise>
         </lidar>
-        <gz_frame_id>base_link</gz_frame_id>
+        <gz_frame_id>lidar_3d_link</gz_frame_id>
       </sensor>
-      <!-- IMU -->
-      <sensor name="imu" type="imu">
-        <pose>0 0 0.2 0 0 0</pose>
-        <update_rate>100</update_rate>
+    </link>
+    <link name="lidar_2d_link">
+      <pose>0.42 0 0.415 0 0 0</pose>
+      <visual name="visual_lidar2d">
+        <geometry>
+          <mesh>
+            <uri>model://lidar_2d/meshes/lidar_2d.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <sensor name="lidar_2d" type="gpu_lidar">
+        <update_rate>20</update_rate>
         <always_on>true</always_on>
-        <topic>/robot/imu</topic>
-        <imu>
-        </imu>
-        <gz_frame_id>base_link</gz_frame_id>
+        <visualize>true</visualize>
+        <topic>/robot/lidar2d/scan</topic>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>920</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14159</min_angle>
+              <max_angle>3.14159</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.5</min>
+            <max>10</max>
+            <resolution>0.03</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.01</stddev>
+          </noise>
+        </lidar>
+        <gz_frame_id>lidar_2d_link</gz_frame_id>
       </sensor>
     </link>
     <!-- ======================= -->
-    <!-- Ruedas: links + joints  -->
+    <!-- Wheels: links           -->
     <!-- ======================= -->
     <!-- FRONT LEFT WHEEL -->
     <link name="left_front_wheel_link">
-      <pose>0.25 0.26 0.129 0 1.57 0</pose>
+      <pose>0.25 0.26 0.129 -1.57 0.0 0</pose>
       <inertial>
         <mass>1.0</mass>
         <inertia>
@@ -196,21 +205,9 @@
         </geometry>
       </visual>
     </link>
-    <joint name="left_front_wheel" type="revolute">
-      <parent>base_link</parent>
-      <child>left_front_wheel_link</child>
-      <pose>0 0 0 0 0 0</pose>
-        <axis>
-            <xyz>0 0 1</xyz>
-            <limit>
-              <lower>-1.79769e+308</lower>
-              <upper>1.79769e+308</upper>
-            </limit>
-        </axis>
-    </joint>
     <!-- REAR LEFT WHEEL -->
     <link name="left_rear_wheel_link">
-      <pose>-0.25 0.26 0.129 0 1.57 0</pose>
+      <pose>-0.25 0.26 0.129 1.57 0 0</pose>
       <inertial>
         <mass>1.0</mass>
         <inertia>
@@ -239,21 +236,9 @@
         </geometry>
       </visual>
     </link>
-    <joint name="left_rear_wheel" type="revolute">
-      <parent>base_link</parent>
-      <child>left_rear_wheel_link</child>
-      <pose>0 0 0 0 0 0</pose>
-         <axis>
-            <xyz>0 0 1</xyz>
-            <limit>
-              <lower>-1.79769e+308</lower>
-              <upper>1.79769e+308</upper>
-            </limit>
-        </axis>
-    </joint>
     <!-- FRONT RIGHT WHEEL -->
     <link name="right_front_wheel_link">
-      <pose>0.25 -0.26 0.129 0 1.57 0</pose>
+      <pose>0.25 -0.26 0.129 1.57 0 0</pose>
       <inertial>
         <mass>1.0</mass>
         <inertia>
@@ -282,21 +267,9 @@
         </geometry>
       </visual>
     </link>
-    <joint name="right_front_wheel" type="revolute">
-      <parent>base_link</parent>
-      <child>right_front_wheel_link</child>
-      <pose>0 0 0 0 0 0</pose>
-        <axis>
-            <xyz>0 0 1</xyz>
-            <limit>
-              <lower>-1.79769e+308</lower>
-              <upper>1.79769e+308</upper>
-            </limit>
-        </axis>
-    </joint>
     <!-- REAR RIGHT WHEEL -->
     <link name="right_rear_wheel_link">
-      <pose>-0.25 -0.26 0.129 0 1.57 0</pose>
+      <pose>-0.25 -0.26 0.129 1.57 0 0</pose>
       <inertial>
         <mass>1.0</mass>
         <inertia>
@@ -325,6 +298,45 @@
         </geometry>
       </visual>
     </link>
+    <!-- ======================= -->
+    <!-- Wheels: Joint           -->
+    <!-- ======================= -->
+    <joint name="left_front_wheel" type="revolute">
+      <parent>base_link</parent>
+      <child>left_front_wheel_link</child>
+      <pose>0 0 0 0 0 0</pose>
+        <axis>
+            <xyz>0 0 1</xyz>
+            <limit>
+              <lower>-1.79769e+308</lower>
+              <upper>1.79769e+308</upper>
+            </limit>
+        </axis>
+    </joint>
+    <joint name="left_rear_wheel" type="revolute">
+      <parent>base_link</parent>
+      <child>left_rear_wheel_link</child>
+      <pose>0 0 0 0 0 0</pose>
+         <axis>
+            <xyz>0 0 1</xyz>
+            <limit>
+              <lower>-1.79769e+308</lower>
+              <upper>1.79769e+308</upper>
+            </limit>
+        </axis>
+    </joint>
+    <joint name="right_front_wheel" type="revolute">
+      <parent>base_link</parent>
+      <child>right_front_wheel_link</child>
+      <pose>0 0 0 0 0 0</pose>
+        <axis>
+            <xyz>0 0 1</xyz>
+            <limit>
+              <lower>-1.79769e+308</lower>
+              <upper>1.79769e+308</upper>
+            </limit>
+        </axis>
+    </joint>
     <joint name="right_rear_wheel" type="revolute">
       <parent>base_link</parent>
       <child>right_rear_wheel_link</child>
@@ -338,8 +350,27 @@
         </axis>
     </joint>
     <!-- ======================= -->
-    <!-- Plugin DiffDrive        -->
+    <!-- Sensor: Joint           -->
     <!-- ======================= -->
+    <joint name="joint_camera_rgbd" type="fixed">
+      <parent>base_link</parent>
+      <child>camera_rgbd_link</child>
+      <pose>0 0 0 0 0 0</pose>
+    </joint>
+    <joint name="joint_lidar_3d" type="fixed">
+      <parent>base_link</parent>
+      <child>lidar_3d_link</child>
+      <pose>0 0 0 0 0 0</pose>
+    </joint>
+    <joint name="joint_lidar_2d" type="fixed">
+      <parent>base_link</parent>
+      <child>lidar_2d_link</child>
+      <pose>0 0 0 0 0 0</pose>
+    </joint>
+
+    <!-- ===================================================================== -->
+    <!-- Plugin DiffDrive                                                      -->
+    <!-- ===================================================================== -->
     <plugin filename="libignition-gazebo-diff-drive-system.so" name="ignition::gazebo::systems::DiffDrive">
       <left_joint>left_front_wheel</left_joint>
       <left_joint>left_rear_wheel</left_joint>

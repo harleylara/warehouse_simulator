@@ -139,6 +139,35 @@ def generate_launch_description():
         output='screen'
     )
 
+    # ======= For TF =========
+    static_tf_lidar2d = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_tf_lidar2d',
+        arguments=[
+            # x y z  roll pitch yaw   parent      child
+            '0.42', '0.0', '0.415',  '0', '0', '0', 'base_link', 'lidar_2d_link'
+        ]
+    )
+
+    static_tf_lidar3d = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_tf_lidar3d',
+        arguments=[
+            '-0.25', '0.0', '0.90',  '0', '0', '0', 'base_link', 'lidar_3d_link'
+        ]
+    )
+
+    static_tf_camera = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_tf_camera_rgbd',
+        arguments=[
+            '-0.2', '0.0', '0.86',  '0', '0', '0', 'base_link', 'camera_rgbd_link'
+        ]
+    )
+
     return LaunchDescription([
         gui_arg,
         world_name_arg,
@@ -149,5 +178,8 @@ def generate_launch_description():
         gz_launch_gui,
         gz_launch_headless,
         bridge,
-        rviz_node
+        rviz_node,
+        static_tf_lidar2d,
+        static_tf_lidar3d,
+        static_tf_camera,
     ])
