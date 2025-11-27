@@ -5,7 +5,6 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /TF1
       Splitter Ratio: 0.5
     Tree Height: 478
   - Class: rviz_common/Selection
@@ -45,6 +44,13 @@ Visualization Manager:
         Z: 0
       Plane: XY
       Plane Cell Count: 10
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Class: rviz_default_plugins/Axes
+      Enabled: true
+      Length: 1
+      Name: Axes
+      Radius: 0.10000000149011612
       Reference Frame: <Fixed Frame>
       Value: true
     - Class: rviz_default_plugins/TF
@@ -126,8 +132,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: -1.4293479919433594
-        Min Value: -1.5688719749450684
+        Max Value: 0.06811392307281494
+        Min Value: -0.06916487216949463
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -203,25 +209,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 3.0600008964538574
+      Distance: 6.129676342010498
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.40631386637687683
-        Y: 0.45525914430618286
-        Z: 0.1574307531118393
+        X: -1.9406788349151611
+        Y: -0.03841891139745712
+        Z: 1.3384249210357666
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.10539847612380981
+      Pitch: 0.6003982424736023
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.6153982877731323
+      Yaw: 2.890404224395752
     Saved: ~
 Window Geometry:
   Displays:

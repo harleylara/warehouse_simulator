@@ -155,7 +155,7 @@ def generate_launch_description():
         executable='static_transform_publisher',
         name='static_tf_lidar3d',
         arguments=[
-            '-0.25', '0.0', '0.90',  '0', '0', '0', 'base_link', 'lidar_3d_link'
+            '-0.278', '0', '1.15',  '0', '0', '0', 'base_link', 'lidar_3d_link'
         ]
     )
 
