@@ -1,0 +1,80 @@
+scenarios:
+  - name: position_01
+    start: [0.5,  0.0, 0.0]     # x, y, yaw
+    goal:  [5.0,  0.0]
+
+  - name: position_02
+    start: [0.5,  2.0, 1.57]
+    goal:  [5.0,  2.0]
+
+  - name: position_03
+    start: [-3.0, -4.0, 3.14]
+    goal:  [ 4.0,  6.0]
+
+  - name: position_04
+    start: [ 3.0, -5.0, 1.57]
+    goal:  [-4.0,  5.0]
+  
+  - name: position_05
+    start: [ 12, -11, -1.57]
+    goal:  [ 2.8, -18]
+  
+  - name: position_06
+    start: [ 2.7, -5.1, 0]
+    goal:  [3.3, -16.9]
+
+  - name: position_07
+    start: [-13.9, 13.9, 1.57]
+    goal:  [-13.2, -1.5]
+  
+  - name: position_08
+    start: [11, 3, 0]
+    goal:  [0, 1.5]
+
+  - name: position_09
+    start: [-12.4, 3.6, 1.57]
+    goal:  [-0.2, 9.8]
+  
+  - name: position_10
+    start: [10.2, 15.5, 1.57]
+    goal:  [-0.2, 9.8]
+
+  - name: position_11
+    start: [-13.1, 14.1, 1.57]
+    goal:  [0, 1.5]
+  
+  - name: position_12
+    start: [ 2.7, -5.1, 0, 1.57]
+    goal:  [ 4.0,  6.0]
+
+  - name: position_13
+    start: [-13.1, 14.1, 1.57]
+    goal:  [-13.2, -1.5]
+  
+  - name: position_14
+    start: [-0.2, 9.8, 0]
+    goal:  [2.7, -5.1]
+
+  - name: position_15
+    start: [0.5,  2.0, 1.57]
+    goal:  [5.0,  0.0]
+  
+  - name: position_16
+    start: [ 3.0, -5.0, 1.57]
+    goal:  [-4.0,  5.0]
+
+  - name: position_17
+    start: [ 2.7, -5.1, 0]
+    goal:  [-13.2, -1.5]
+  
+  - name: position_18
+    start: [-13.2, -1.5, -1.57]
+    goal:  [-3.0, -4.0]
+
+  - name: position_19
+    start: [4.0,  6.0, 1.57]
+    goal:  [10.2, 15.5]
+  
+  - name: position_20
+    start: [2.7, -4.1, 0]
+    goal:  [0.7, 1.1]
